@@ -13,6 +13,11 @@ const MAX_BOUNDS: [[number, number], [number, number]] = [[-82, -58], [-46, -18]
 // Encuadre de "ver Argentina completa"
 const ARGENTINA_VIEW: [[number, number], [number, number]] = [[-74, -55.5], [-53, -21.5]];
 
+function isInsideArgentina([lng, lat]: [number, number]) {
+  const [[west, south], [east, north]] = MAX_BOUNDS;
+  return lng >= west && lng <= east && lat >= south && lat <= north;
+}
+
 const COLORS = {
   land: "#19251E",  // --color-surface
   water: "#0B120E", // un tono más oscuro que --color-deep
@@ -37,7 +42,36 @@ export default function MapView({ region }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [zoom, setZoom] = useState(region.zoom);
+  const userMarkerRef = useRef<maplibregl.Marker | null>(null);
 
+  function flyToUser(position: GeolocationPosition) {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const lngLat: [number, number] = [position.coords.longitude, position.coords.latitude];
+    if (!isInsideArgentina(lngLat)) return;
+
+    if (!userMarkerRef.current) {
+      const el = document.createElement("div");
+      el.className =
+        "size-4 rounded-full border-2 border-deep bg-lime shadow-[0_0_0_6px_var(--color-lime-glow)]";
+      el.setAttribute("aria-label", "Tu ubicación");
+      userMarkerRef.current = new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(map);
+    } else {
+      userMarkerRef.current.setLngLat(lngLat);
+    }
+
+    map.flyTo({ center: lngLat, zoom: 9, duration: 1500, essential: true });
+  }
+
+  function locateUser() {
+    if (!("geolocation" in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      flyToUser,
+      (error) => console.info("Ubicación no disponible:", error.message),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 10 * 60 * 1000 }
+    );
+  }
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -52,7 +86,17 @@ export default function MapView({ region }: MapViewProps) {
       attributionControl: { compact: true },
     });
 
-    map.on("load", () => applyPokeradarColors(map));
+    map.on("load", () => {
+      applyPokeradarColors(map);
+
+      // Si ya nos dio permiso antes, lo ubicamos sin preguntar
+      navigator.permissions
+        ?.query({ name: "geolocation" })
+        .then((status) => {
+          if (status.state === "granted") locateUser();
+        })
+        .catch(() => { });
+    });
     map.on("zoomend", () => setZoom(map.getZoom()));
     mapRef.current = map;
 
@@ -84,11 +128,19 @@ export default function MapView({ region }: MapViewProps) {
           <MapButton label="Alejar" onClick={() => mapRef.current?.zoomOut()} path="M5 12h14" withBorder />
         </div>
         <div className="overflow-hidden rounded-md border border-line bg-surface shadow-panel">
-          <MapButton
-            label="Ver Argentina completa"
-            onClick={() => mapRef.current?.fitBounds(ARGENTINA_VIEW, { padding: 40, duration: 1200 })}
-            path="M12 3v3M12 18v3M3 12h3M18 12h3M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
-          />
+          <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
+            <MapButton
+              label="Mi ubicación"
+              onClick={locateUser}
+              path="M12 3v3M12 18v3M3 12h3M18 12h3M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
+            />
+            <MapButton
+              label="Ver Argentina completa"
+              onClick={() => mapRef.current?.fitBounds(ARGENTINA_VIEW, { padding: 40, duration: 1200 })}
+              path="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"
+              withBorder
+            />
+          </div>
         </div>
       </div>
 
