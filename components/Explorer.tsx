@@ -1,17 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Sidebar from "@/components/layout/Sidebar";
 import PokemonDrawer from "@/components/pokemon/PokemonDrawer";
-import type { RegionId } from "@/lib/regions";
+import { REGIONS, type RegionId } from "@/lib/regions";
+
+// El mapa solo existe en el navegador: lo cargamos sin SSR
+const MapView = dynamic(() => import("@/components/map/MapView"), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 animate-pulse bg-surface" />,
+});
 
 export default function Explorer() {
   const [regionId, setRegionId] = useState<RegionId>("litoral");
   const [pokemonId, setPokemonId] = useState<number | null>(null);
 
+  const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
+
   function handleSelectRegion(id: RegionId) {
     setRegionId(id);
-    setPokemonId(null); // al cambiar de región se cierra la ficha
+    setPokemonId(null);
   }
 
   return (
@@ -22,23 +31,19 @@ export default function Explorer() {
         aria-label="Mapa de Argentina"
         className="relative min-h-0 overflow-hidden rounded-lg border border-line bg-deep"
       >
-        {/* TEMPORAL: este botón simula tocar un marcador. Lo reemplaza el mapa en el paso 4 */}
-        <div className="absolute inset-0 grid place-items-center">
-          <button
-            type="button"
-            onClick={() => setPokemonId(1)}
-            className="rounded-full border border-lime px-6 py-3 text-sm font-medium hover:bg-lime-glow"
-          >
-            Probar: tocar un Pokémon
-          </button>
-        </div>
+        <MapView region={region} />
+
+        {/* TEMPORAL: lo reemplazan los marcadores en el paso 5 */}
+        <button
+          type="button"
+          onClick={() => setPokemonId(1)}
+          className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full border border-lime bg-surface px-5 py-2.5 text-sm font-medium hover:bg-lime-glow"
+        >
+          Probar: tocar un Pokémon
+        </button>
 
         {pokemonId !== null && (
-          <PokemonDrawer
-            key={pokemonId}
-            pokemonId={pokemonId}
-            onClose={() => setPokemonId(null)}
-          />
+          <PokemonDrawer key={pokemonId} pokemonId={pokemonId} onClose={() => setPokemonId(null)} />
         )}
       </section>
     </main>

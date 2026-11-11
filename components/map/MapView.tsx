@@ -1,0 +1,125 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import * as maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import type { Region } from "@/lib/regions";
+maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
+
+const STYLE_URL = "https://tiles.openfreemap.org/styles/dark";
+
+// hasta donde muestra la camara , un poquito mas que argentina
+const MAX_BOUNDS: [[number, number], [number, number]] = [[-82, -58], [-46, -18]];
+// Encuadre de "ver Argentina completa"
+const ARGENTINA_VIEW: [[number, number], [number, number]] = [[-74, -55.5], [-53, -21.5]];
+
+const COLORS = {
+  land: "#19251E",  // --color-surface
+  water: "#0B120E", // un tono más oscuro que --color-deep
+};
+
+function applyPokeradarColors(map: maplibregl.Map) {
+  for (const layer of map.getStyle().layers) {
+    if (layer.type === "background") {
+      map.setPaintProperty(layer.id, "background-color", COLORS.land);
+    }
+    if (layer.type === "fill" && layer.id.includes("water")) {
+      map.setPaintProperty(layer.id, "fill-color", COLORS.water);
+    }
+  }
+}
+
+interface MapViewProps {
+  region: Region;
+}
+
+export default function MapView({ region }: MapViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const [zoom, setZoom] = useState(region.zoom);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: STYLE_URL,
+      center: region.center,
+      zoom: region.zoom,
+      minZoom: 3.5,
+      maxZoom: 12,
+      maxBounds: MAX_BOUNDS,
+      attributionControl: { compact: true },
+    });
+
+    map.on("load", () => applyPokeradarColors(map));
+    map.on("zoomend", () => setZoom(map.getZoom()));
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    mapRef.current?.flyTo({
+      center: region.center,
+      zoom: region.zoom,
+      duration: 1200,
+      essential: true,
+    });
+  }, [region]);
+
+  return (
+    <>
+      <div className="absolute inset-0">
+        <div ref={containerRef} className="h-full w-full" />
+      </div>
+      {/* Controles */}
+      <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">
+        <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
+          <MapButton label="Acercar" onClick={() => mapRef.current?.zoomIn()} path="M12 5v14M5 12h14" />
+          <MapButton label="Alejar" onClick={() => mapRef.current?.zoomOut()} path="M5 12h14" withBorder />
+        </div>
+        <div className="overflow-hidden rounded-md border border-line bg-surface shadow-panel">
+          <MapButton
+            label="Ver Argentina completa"
+            onClick={() => mapRef.current?.fitBounds(ARGENTINA_VIEW, { padding: 40, duration: 1200 })}
+            path="M12 3v3M12 18v3M3 12h3M18 12h3M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
+          />
+        </div>
+      </div>
+
+      {/* Nivel de zoom */}
+      <span className="absolute bottom-4 left-4 z-10 inline-flex h-9 items-center gap-2 rounded-md border border-line bg-surface px-3 font-mono text-[13px] text-ink-muted">
+        Zoom <b className="font-medium text-ink">{zoom.toFixed(1)}</b>
+      </span>
+    </>
+  );
+}
+
+interface MapButtonProps {
+  label: string;
+  onClick: () => void;
+  path: string;
+  withBorder?: boolean;
+}
+
+function MapButton({ label, onClick, path, withBorder }: MapButtonProps) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      className={`grid size-12 place-items-center text-ink transition-colors hover:bg-elevated hover:text-lime ${withBorder ? "border-t border-line" : ""
+        }`}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" className="fill-none stroke-current" strokeWidth="1.8" strokeLinecap="round">
+        <path d={path} />
+      </svg>
+    </button>
+  );
+}
