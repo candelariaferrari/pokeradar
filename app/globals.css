@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Superficies */
+  --color-deep: #101814;
+  --color-surface: #19251E;
+  --color-elevated: #25352A;
+  --color-line: #2E4234;
+  --color-line-strong: #4A6652;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Radar */
+  --color-lime: #A3E635;
+  --color-lime-soft: #D0F58A;
+  --color-lime-glow: rgb(163 230 53 / 0.16);
+  --color-on-lime: #101814;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Texto */
+  --color-ink: #E8EFE8;
+  --color-ink-muted: #A7B8AC;
+  --color-ink-faint: #6E8574;
+  --color-danger: #F2836B;
+
+  /* Tipos Pokémon */
+  --color-type-fire: #F0803C;
+  --color-type-water: #6495ED;
+  --color-type-grass: #7EC65B;
+  --color-type-electric: #FBCF47;
+  --color-type-poison: #9E46A0;
+  --color-type-psychic: #F75B8B;
+  --color-type-rock: #C2A878;
+  --color-type-ground: #B8895A;
+  --color-type-bug: #A8B820;
+  --color-type-normal: #B5B5A8;
+  --color-type-flying: #9DB4E8;
+  --color-type-ice: #8FD8E0;
+  --color-type-dragon: #8B78F0;
+
+  /* Radios y sombras */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --shadow-panel: 0 16px 40px rgb(0 0 0 / 0.45);
+  --shadow-glow: 0 0 0 1px #A3E635, 0 0 24px rgb(163 230 53 / 0.35);
+
+  /* Animaciones */
+  --animate-radar-ping: radar-ping 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  --animate-stat-grow: stat-grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-drawer-in: drawer-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes radar-ping {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+  @keyframes stat-grow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @keyframes drawer-in {
+    from { transform: translateX(24px); opacity: 0; }
+    to { transform: none; opacity: 1; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Las fuentes vienen de next/font (ver layout.tsx) */
+@theme inline {
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-deep text-ink font-sans antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-lime);
+    outline-offset: 2px;
+  }
 }
