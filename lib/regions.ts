@@ -3,11 +3,13 @@ export type PokemonType =
   | "rock" | "ground" | "bug" | "normal" | "flying" | "ice" | "dragon";
 
 export type RegionId =
-  | "noa" | "litoral" | "cuyo" | "pampa" | "costa" | "patagonia" | "tdf";
+  | "misiones" | "cordoba" | "buenos-aires" | "costa" | "mendoza" | "patagonia";
 
 export interface Region {
   id: RegionId;
+  /** Nombre con el patrón paisaje + gentilicio */
   name: string;
+  province: string;
   biome: string;
   types: PokemonType[];
   /** Centro del mapa en formato MapLibre: [longitud, latitud] */
@@ -16,11 +18,10 @@ export interface Region {
 }
 
 export const REGIONS: Region[] = [
-  { id: "noa", name: "Noroeste", biome: "Puna · Montaña / altura", types: ["rock", "ground"], center: [-66.5, -24.0], zoom: 6 },
-  { id: "litoral", name: "Litoral", biome: "Misiones · Selva", types: ["grass", "bug", "poison"], center: [-54.6, -26.9], zoom: 6.5 },
-  { id: "cuyo", name: "Cuyo", biome: "Desierto", types: ["fire", "ground"], center: [-68.8, -32.9], zoom: 6 },
-  { id: "pampa", name: "Pampa", biome: "Pradera", types: ["normal", "flying"], center: [-61.5, -35.5], zoom: 5.5 },
-  { id: "costa", name: "Costa Atlántica", biome: "Mar", types: ["water"], center: [-57.6, -38.0], zoom: 6 },
-  { id: "patagonia", name: "Patagonia", biome: "Estepa / viento", types: ["flying", "ice", "dragon"], center: [-69.5, -45.5], zoom: 5 },
-  { id: "tdf", name: "Tierra del Fuego", biome: "Glaciar", types: ["ice", "water"], center: [-68.3, -54.5], zoom: 6.5 },
+  { id: "misiones", name: "Selva Misionera", province: "Misiones", biome: "Selva", types: ["grass", "bug", "poison"], center: [-54.6, -26.9], zoom: 7 },
+  { id: "cordoba", name: "Sierras Cordobesas", province: "Córdoba", biome: "Sierras", types: ["rock", "ground", "grass"], center: [-64.6, -31.4], zoom: 7.5 },
+  { id: "buenos-aires", name: "Urbe Porteña", province: "Buenos Aires", biome: "Urbano", types: ["electric", "normal"], center: [-58.44, -34.61], zoom: 9 },
+  { id: "costa", name: "Costa Atlántica", province: "Buenos Aires (costa)", biome: "Marino", types: ["water"], center: [-57.55, -38.0], zoom: 7.5 },
+  { id: "mendoza", name: "Andes Mendocinos", province: "Mendoza", biome: "Montaña / Árido", types: ["ground", "rock", "fire"], center: [-68.84, -32.89], zoom: 7 },
+  { id: "patagonia", name: "Hielos Patagónicos", province: "Patagonia sur", biome: "Montaña / Hielo", types: ["ice", "rock", "ground"], center: [-72.5, -49.8], zoom: 6.5 },
 ];
