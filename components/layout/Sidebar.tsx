@@ -1,6 +1,7 @@
 import { REGIONS, type RegionId } from "@/lib/radar/regions";
 import TeamPanel from "@/components/layout/TeamPanel";
 import PokemonSearch from "@/components/layout/PokemonSearch";
+import RegionThumbnail from "@/components/layout/RegionThumbnail";
 
 interface SidebarProps {
   selectedRegionId: RegionId;
@@ -10,9 +11,9 @@ interface SidebarProps {
   onSearchSelect: (id: number) => void;
 }
 
-export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, onSelectPokemon, onSearchSelect }: SidebarProps) {  
+export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, onSelectPokemon, onSearchSelect }: SidebarProps) {
   return (
-  <aside
+    <aside
       aria-label="Exploración"
       className="hidden min-h-0 flex-col gap-4 rounded-lg border border-line bg-surface p-5 lg:flex"
     >
@@ -31,11 +32,11 @@ export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, o
                 aria-pressed={isSelected}
                 onClick={() => onSelectRegion(region.id)}
                 className={`flex w-full items-center gap-3 rounded-md border-[1.5px] p-1 pr-3 text-left transition-colors ${isSelected
-                    ? "border-lime bg-lime-glow shadow-[0_0_16px_rgb(163_230_53/0.18)]"
-                    : "border-transparent bg-elevated hover:border-line-strong"
+                  ? "border-lime bg-lime-glow shadow-[0_0_16px_rgb(163_230_53/0.18)]"
+                  : "border-transparent bg-elevated hover:border-line-strong"
                   }`}
               >
-                <span aria-hidden="true" className="h-13 w-20 shrink-0 rounded-sm bg-surface" />
+                <RegionThumbnail regionId={region.id} />
                 <span className="flex flex-col">
                   <span className="text-[15px] font-medium">{region.name}</span>
                   <span className="text-xs text-ink-muted">
