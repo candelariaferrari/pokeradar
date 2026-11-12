@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import Sidebar from "@/components/layout/Sidebar";
 import PokemonDrawer from "@/components/pokemon/PokemonDrawer";
-import { REGIONS, type RegionId } from "@/lib/regions";
+import { REGIONS, findNearestRegion, type RegionId } from "@/lib/regions";
 import { scanRegion, type DetectedPokemon } from "@/lib/radar";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
@@ -37,6 +37,12 @@ export default function Explorer() {
     setPokemonId(id);
     setDiscovered((prev) => new Set(prev).add(id));
   }
+  function handleUserLocated(point: [number, number]) {
+    const nearest = findNearestRegion(point);
+    if (!nearest) return false;
+    handleSelectRegion(nearest.id);
+    return true;
+  }
 
   return (
     <main className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -52,6 +58,8 @@ export default function Explorer() {
           selectedPokemonId={pokemonId}
           onSelectPokemon={handleSelectPokemon}
           onReady={handleScan}
+          onUserLocated={handleUserLocated}
+
         />
 
         {/* Radar: contadores + escanear */}
@@ -61,7 +69,7 @@ export default function Explorer() {
             className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-medium shadow-panel"
           >
             <span aria-hidden="true" className="size-2.5 rounded-full bg-lime shadow-[0_0_0_4px_var(--color-lime-glow)]" />
-                        {detected.length > 0 ? (
+            {detected.length > 0 ? (
               <>
                 <span className="font-mono">{detected.length}</span> detectados
               </>

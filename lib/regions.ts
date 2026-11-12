@@ -24,3 +24,29 @@ export const REGIONS: Region[] = [
   { id: "mendoza", name: "Andes Mendocinos", province: "Mendoza", biome: "Montaña / Árido", types: ["ground", "rock", "fire"], center: [-68.84, -32.89], zoom: 7 },
   { id: "patagonia", name: "Hielos Patagónicos", province: "Patagonia sur", biome: "Montaña / Hielo", types: ["ice", "rock", "ground"], center: [-72.5, -49.8], zoom: 6.5 },
 ];
+
+/** Distancia aproximada en km entre dos puntos [lng, lat] (fórmula de Haversine) */
+export function distanceKm([lng1, lat1]: [number, number], [lng2, lat2]: [number, number]): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(a));
+}
+
+/** La región más cercana a un punto, o null si ninguna está a menos de maxKm */
+export function findNearestRegion(point: [number, number], maxKm = 350): Region | null {
+  let nearest: Region | null = null;
+  let shortest = Infinity;
+
+  for (const region of REGIONS) {
+    const distance = distanceKm(point, region.center);
+    if (distance < shortest) {
+      shortest = distance;
+      nearest = region;
+    }
+  }
+  return shortest <= maxKm ? nearest : null;
+}

@@ -39,11 +39,14 @@ interface MapViewProps {
   region: Region;
   pokemons: DetectedPokemon[];
   selectedPokemonId: number | null;
+  /** Devuelve true si la ubicación cayó cerca de una región (y la seleccionó) */
+  onUserLocated: (point: [number, number]) => boolean;
   onSelectPokemon: (id: number) => void;
   onReady: () => void;
 }
 
-export default function MapView({ region, pokemons, selectedPokemonId, onSelectPokemon, onReady }: MapViewProps) {  const containerRef = useRef<HTMLDivElement>(null);
+export default function MapView({ region, pokemons, selectedPokemonId, onUserLocated, onSelectPokemon, onReady }: MapViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const [zoom, setZoom] = useState(region.zoom);
@@ -65,7 +68,10 @@ export default function MapView({ region, pokemons, selectedPokemonId, onSelectP
       userMarkerRef.current.setLngLat(lngLat);
     }
 
-    map.flyTo({ center: lngLat, zoom: 9, duration: 1500, essential: true });
+    const selectedNearbyRegion = onUserLocated(lngLat);
+    if (!selectedNearbyRegion) {
+      map.flyTo({ center: lngLat, zoom: 9, duration: 1500, essential: true });
+    }
   }
 
   function locateUser() {
@@ -94,13 +100,13 @@ export default function MapView({ region, pokemons, selectedPokemonId, onSelectP
 
     map.on("load", () => {
       applyPokeradarColors(map);
-      onReady(); 
+      onReady();
       navigator.permissions
         ?.query({ name: "geolocation" })
         .then((status) => {
           if (status.state === "granted") locateUser();
         })
-        .catch(() => {});
+        .catch(() => { });
     });
     map.on("zoomend", () => setZoom(map.getZoom()));
     mapRef.current = map;
@@ -203,9 +209,8 @@ function MapButton({ label, onClick, path, withBorder }: MapButtonProps) {
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={`grid size-12 place-items-center text-ink transition-colors hover:bg-elevated hover:text-lime ${
-        withBorder ? "border-t border-line" : ""
-      }`}
+      className={`grid size-12 place-items-center text-ink transition-colors hover:bg-elevated hover:text-lime ${withBorder ? "border-t border-line" : ""
+        }`}
     >
       <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" className="fill-none stroke-current" strokeWidth="1.8" strokeLinecap="round">
         <path d={path} />
