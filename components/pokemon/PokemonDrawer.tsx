@@ -55,7 +55,7 @@ export default function PokemonDrawer({ pokemonId, regionName, onClose }: Pokemo
     <aside
       aria-label="Ficha del Pokémon"
       aria-busy={status === "loading"}
-      className="absolute inset-y-4 right-4 z-10 flex w-105 max-w-[calc(100%-2rem)] animate-drawer-in flex-col gap-6 overflow-y-auto rounded-lg border border-line bg-surface p-6 shadow-panel"
+      className="fixed inset-0 z-50 flex animate-drawer-in flex-col gap-6 overflow-y-auto bg-surface p-6 lg:absolute lg:inset-y-4 lg:left-auto lg:right-4 lg:z-10 lg:w-105 lg:max-w-[calc(100%-2rem)] lg:rounded-lg lg:border lg:border-line lg:shadow-panel"
     >
       <div className="absolute right-3 top-3 flex items-center gap-1">
         {status === "ready" && <CopyLinkButton pokemonId={pokemonId} />}

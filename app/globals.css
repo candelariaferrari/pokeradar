@@ -51,7 +51,12 @@
   --animate-radar-ping: radar-ping 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
   --animate-stat-grow: stat-grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-drawer-in: drawer-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-
+  --animate-sheet-in: sheet-in 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  
+  @keyframes sheet-in {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
   @keyframes radar-ping {
     0% { transform: scale(1); opacity: 0.7; }
     100% { transform: scale(2.6); opacity: 0; }

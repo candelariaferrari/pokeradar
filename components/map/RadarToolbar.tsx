@@ -38,7 +38,7 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
 
       {/* Filtro por tipo: solo si hay más de un tipo para elegir */}
       {types.length > 1 && (
-        <div role="group" aria-label="Filtrar por tipo" className="flex flex-wrap gap-2">
+        <div role="group" aria-label="Filtrar por tipo" className="flex max-w-full gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
           <button
             type="button"
             onClick={() => onTypeFilter(null)}
