@@ -26,3 +26,26 @@ export function formatName(name: string): string {
   };
   return special[name] ?? name.charAt(0).toUpperCase() + name.slice(1);
 }
+export type StatName =
+  | "hp" | "attack" | "defense" | "special-attack" | "special-defense" | "speed";
+
+export const STAT_LABELS: Record<StatName, string> = {
+  hp: "PS",
+  attack: "Ataque",
+  defense: "Defensa",
+  "special-attack": "At. Esp.",
+  "special-defense": "Def. Esp.",
+  speed: "Velocidad",
+};
+
+export interface PokemonDetail {
+  id: number;
+  name: string;
+  types: PokemonType[];
+  genus: string | null;       // "Pokémon Ratón"
+  description: string | null;
+  heightM: number;
+  weightKg: number;
+  stats: { name: StatName; value: number }[];
+  artwork: string;
+}

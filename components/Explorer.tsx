@@ -44,6 +44,8 @@ export default function Explorer() {
     return true;
   }
 
+  const openPokemon = detected.find((p) => p.id === pokemonId);
+  const habitat = REGIONS.find((r) => r.id === openPokemon?.region) ?? region;
   return (
     <main className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[340px_minmax(0,1fr)]">
       <Sidebar selectedRegionId={regionId} onSelectRegion={handleSelectRegion} />
@@ -93,7 +95,12 @@ export default function Explorer() {
         </div>
 
         {pokemonId !== null && (
-          <PokemonDrawer key={pokemonId} pokemonId={pokemonId} onClose={() => setPokemonId(null)} />
+          <PokemonDrawer
+            key={pokemonId}
+            pokemonId={pokemonId}
+            regionName={`${habitat.name} · ${habitat.province}`}
+            onClose={() => setPokemonId(null)}
+          />
         )}
       </section>
     </main>
