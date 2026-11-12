@@ -1,17 +1,47 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Sidebar from "@/components/layout/Sidebar";
 import PokemonDrawer from "@/components/pokemon/PokemonDrawer";
-import type { RegionId } from "@/lib/regions";
+import { REGIONS, findNearestRegion, type RegionId } from "@/lib/regions";
+import { scanRegion, type DetectedPokemon } from "@/lib/radar";
+
+const MapView = dynamic(() => import("@/components/map/MapView"), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 animate-pulse bg-surface" />,
+});
+
+const INITIAL_REGION: RegionId = "misiones";
 
 export default function Explorer() {
-  const [regionId, setRegionId] = useState<RegionId>("litoral");
+  const [regionId, setRegionId] = useState<RegionId>(INITIAL_REGION);
+  const [detected, setDetected] = useState<DetectedPokemon[]>([]);
   const [pokemonId, setPokemonId] = useState<number | null>(null);
+  const [discovered, setDiscovered] = useState<Set<number>>(() => new Set());
+
+  const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
 
   function handleSelectRegion(id: RegionId) {
     setRegionId(id);
-    setPokemonId(null); // al cambiar de región se cierra la ficha
+    setPokemonId(null);
+    setDetected(scanRegion(id));
+  }
+
+  function handleScan() {
+    setPokemonId(null);
+    setDetected(scanRegion(regionId));
+  }
+
+  function handleSelectPokemon(id: number) {
+    setPokemonId(id);
+    setDiscovered((prev) => new Set(prev).add(id));
+  }
+  function handleUserLocated(point: [number, number]) {
+    const nearest = findNearestRegion(point);
+    if (!nearest) return false;
+    handleSelectRegion(nearest.id);
+    return true;
   }
 
   return (
@@ -22,23 +52,48 @@ export default function Explorer() {
         aria-label="Mapa de Argentina"
         className="relative min-h-0 overflow-hidden rounded-lg border border-line bg-deep"
       >
-        {/* TEMPORAL: este botón simula tocar un marcador. Lo reemplaza el mapa en el paso 4 */}
-        <div className="absolute inset-0 grid place-items-center">
+        <MapView
+          region={region}
+          pokemons={detected}
+          selectedPokemonId={pokemonId}
+          onSelectPokemon={handleSelectPokemon}
+          onReady={handleScan}
+          onUserLocated={handleUserLocated}
+
+        />
+
+        {/* Radar: contadores + escanear */}
+        <div className="absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2">
+          <span
+            role="status"
+            className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-medium shadow-panel"
+          >
+            <span aria-hidden="true" className="size-2.5 rounded-full bg-lime shadow-[0_0_0_4px_var(--color-lime-glow)]" />
+            {detected.length > 0 ? (
+              <>
+                <span className="font-mono">{detected.length}</span> detectados
+              </>
+            ) : (
+              "Escaneando…"
+            )}
+          </span>
+          <span className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-medium shadow-panel">
+            <span className="font-mono">{discovered.size}</span> descubiertos
+          </span>
           <button
             type="button"
-            onClick={() => setPokemonId(1)}
-            className="rounded-full border border-lime px-6 py-3 text-sm font-medium hover:bg-lime-glow"
+            onClick={handleScan}
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold text-on-lime shadow-panel transition-colors hover:bg-lime-soft"
           >
-            Probar: tocar un Pokémon
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="fill-none stroke-current" strokeWidth="2" strokeLinecap="round">
+              <path d="M12 12l6-6M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5" />
+            </svg>
+            Escanear zona
           </button>
         </div>
 
         {pokemonId !== null && (
-          <PokemonDrawer
-            key={pokemonId}
-            pokemonId={pokemonId}
-            onClose={() => setPokemonId(null)}
-          />
+          <PokemonDrawer key={pokemonId} pokemonId={pokemonId} onClose={() => setPokemonId(null)} />
         )}
       </section>
     </main>

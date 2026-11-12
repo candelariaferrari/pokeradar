@@ -35,16 +35,17 @@ export default function Sidebar({ selectedRegionId, onSelectRegion }: SidebarPro
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => onSelectRegion(region.id)}
-                className={`flex w-full items-center gap-3 rounded-md border-[1.5px] p-1 pr-3 text-left transition-colors ${
-                  isSelected
+                className={`flex w-full items-center gap-3 rounded-md border-[1.5px] p-1 pr-3 text-left transition-colors ${isSelected
                     ? "border-lime bg-lime-glow shadow-[0_0_16px_rgb(163_230_53/0.18)]"
                     : "border-transparent bg-elevated hover:border-line-strong"
-                }`}
+                  }`}
               >
                 <span aria-hidden="true" className="h-13 w-20 shrink-0 rounded-sm bg-surface" />
                 <span className="flex flex-col">
                   <span className="text-[15px] font-medium">{region.name}</span>
-                  <span className="text-xs text-ink-muted">{region.biome}</span>
+                  <span className="text-xs text-ink-muted">
+                    {region.province} · {region.biome}
+                  </span>
                 </span>
               </button>
             </li>
