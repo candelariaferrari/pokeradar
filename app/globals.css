@@ -52,7 +52,11 @@
   --animate-stat-grow: stat-grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-drawer-in: drawer-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-sheet-in: sheet-in 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  
+  --animate-drawer-out: drawer-out 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+  --animate-marker-in: marker-in 0.42s cubic-bezier(0.2, 0.8, 0.2, 1.2) both;
+  --animate-radar-halo: radar-halo 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  --animate-marker-out: marker-out 0.24s cubic-bezier(0.4, 0, 1, 1) both;
+
   @keyframes sheet-in {
     from { transform: translateY(24px); opacity: 0; }
     to { transform: none; opacity: 1; }
@@ -69,6 +73,23 @@
     from { transform: translateX(24px); opacity: 0; }
     to { transform: none; opacity: 1; }
   }
+    @keyframes drawer-out {
+    from { transform: none; opacity: 1; }
+    to { transform: translateX(24px); opacity: 0; }
+  }
+  @keyframes marker-in {
+    0% { transform: scale(0.3); opacity: 0; }
+    70% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes radar-halo {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+    @keyframes marker-out {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.3); opacity: 0; }
+  }
 }
 
 /* Las fuentes vienen de next/font (ver layout.tsx) */
@@ -84,5 +105,16 @@
   :focus-visible {
     outline: 2px solid var(--color-lime);
     outline-offset: 2px;
+  }
+    * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+}
+/* Scroll sin barra visible (se sigue pudiendo desplazar) */
+@utility scrollbar-none {
+  scrollbar-width: none; /* Chrome, Firefox, Edge */
+  &::-webkit-scrollbar {
+    display: none; /* Safari */
   }
 }

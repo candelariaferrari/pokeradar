@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
@@ -34,29 +34,48 @@ export default function Explorer() {
   const [teamOpen, setTeamOpen] = useState(false); // equipo abajo del mapa en mobile
   const { discovered, favorites } = useCollection();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-
   const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
+  const [leaving, setLeaving] = useState<DetectedPokemon[]>([]); // salen con animación
+  const [drawerClosing, setDrawerClosing] = useState(false);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Al desmontar, cancelar temporizadores pendientes
+  useEffect(() => {
+    return () => {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  function scan(id: RegionId, options?: Parameters<typeof scanRegion>[1]) {
+    setLeaving(detected); // los que estaban se despiden con animación…
+    setDetected(scanRegion(id, options)); // …y los nuevos aparecen escalonados
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    leaveTimer.current = setTimeout(() => setLeaving([]), 400);
+  }
   function handleSelectRegion(id: RegionId) {
     setRegionId(id);
     setTypeFilter(null);
     setPokemonId(null);
-    setDetected(scanRegion(id));
+    scan(id);
   }
 
   function handleScan() {
     setPokemonId(null);
-    setDetected(scanRegion(regionId, { type: typeFilter }));
+    scan(regionId, { type: typeFilter });
   }
 
   function handleTypeFilter(type: PokemonType | null) {
     setTypeFilter(type);
     setPokemonId(null);
-    setDetected(scanRegion(regionId, { type }));
+    scan(regionId, { type });
   }
 
   /** Tocar un marcador: en desktop abre la ficha; en mobile, la vista previa */
   function handleSelectPokemon(id: number) {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setDrawerClosing(false);
     setPokemonId(id);
     setDetailOpen(false);
     collectionStore.discover(id);
@@ -73,7 +92,7 @@ export default function Explorer() {
     if (!entry) return;
     setRegionId(entry.region);
     setTypeFilter(null);
-    setDetected(scanRegion(entry.region, { include: id }));
+    scan(entry.region, { include: id });
     handleSelectPokemon(id);
   }
 
@@ -84,9 +103,28 @@ export default function Explorer() {
     return true;
   }
 
-  function closeDrawer() {
+  function finishCloseDrawer() {
+    setDrawerClosing(false);
     if (isDesktop) setPokemonId(null);
     else setDetailOpen(false); // en mobile vuelve a la vista previa
+  }
+
+  /** Reproduce la salida y recién después cierra */
+  function closeDrawer() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      finishCloseDrawer();
+      return;
+    }
+    setDrawerClosing(true);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(finishCloseDrawer, 220); // misma duración que drawer-out
+  }
+
+  /** Clic en una parte vacía del mapa */
+  function handleMapClick() {
+    if (pokemonId === null) return;
+    if (isDesktop) closeDrawer();
+    else setPokemonId(null); // en mobile cierra la vista previa
   }
 
   const openEntry = pokemonId !== null ? getPokemonEntry(pokemonId) : undefined;
@@ -125,10 +163,12 @@ export default function Explorer() {
           <MapView
             region={region}
             pokemons={detected}
+            leavingPokemons={leaving}
             selectedPokemonId={pokemonId}
             onSelectPokemon={handleSelectPokemon}
             onReady={handleScan}
             onUserLocated={handleUserLocated}
+            onMapClick={handleMapClick}
           />
 
           <RadarToolbar
@@ -144,6 +184,7 @@ export default function Explorer() {
               key={pokemonId}
               pokemonId={pokemonId}
               regionName={`${habitat.name} · ${habitat.province}`}
+              closing={drawerClosing}
               onClose={closeDrawer}
             />
           )}

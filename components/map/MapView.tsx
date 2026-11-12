@@ -45,13 +45,31 @@ interface MapViewProps {
   onUserLocated: (point: [number, number]) => boolean;
   onSelectPokemon: (id: number) => void;
   onReady: () => void;
+  /** Los del escaneo anterior, mientras hacen su animación de salida */
+  leavingPokemons: DetectedPokemon[];
+  /** Clic en una parte vacía del mapa */
+  onMapClick: () => void;
 }
 
-export default function MapView({ region, pokemons, selectedPokemonId, onUserLocated, onSelectPokemon, onReady }: MapViewProps) {
+export default function MapView({
+  region,
+  pokemons,
+  leavingPokemons,
+  selectedPokemonId,
+  onSelectPokemon,
+  onReady,
+  onUserLocated,
+  onMapClick,
+}: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const [zoom, setZoom] = useState(region.zoom);
+  const onMapClickRef = useRef(onMapClick);
+
+  useEffect(() => {
+    onMapClickRef.current = onMapClick;
+  }, [onMapClick]);
 
   function flyToUser(position: GeolocationPosition) {
     const map = mapRef.current;
@@ -111,6 +129,12 @@ export default function MapView({ region, pokemons, selectedPokemonId, onUserLoc
         .catch(() => { });
     });
     map.on("zoomend", () => setZoom(map.getZoom()));
+    // Clic en el mapa (no en un marcador, y sin arrastrar): cerrar la selección
+    map.on("click", (e) => {
+      const target = e.originalEvent.target as HTMLElement | null;
+      if (target?.closest(".maplibregl-marker")) return;
+      onMapClickRef.current();
+    });
     mapRef.current = map;
 
     return () => {
@@ -150,6 +174,20 @@ export default function MapView({ region, pokemons, selectedPokemonId, onUserLoc
     });
   }, [markerNodes, selectedPokemonId]);
 
+  // 6) Marcadores del escaneo anterior, solo mientras hacen su salida
+  const leavingNodes = useMemo(
+    () => leavingPokemons.map((pokemon) => ({ pokemon, element: document.createElement("div") })),
+    [leavingPokemons]
+  );
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const markers = leavingNodes.map(({ pokemon, element }) =>
+      new maplibregl.Marker({ element }).setLngLat(pokemon.position).addTo(map)
+    );
+    return () => markers.forEach((marker) => marker.remove());
+  }, [leavingNodes]);
   return (
     <>
       <div className="absolute inset-0">
@@ -157,15 +195,23 @@ export default function MapView({ region, pokemons, selectedPokemonId, onUserLoc
       </div>
 
       {/* React dibuja cada marcador DENTRO del elemento que maneja MapLibre */}
-      {markerNodes.map(({ pokemon, element }) =>
+      {markerNodes.map(({ pokemon, element }, index) =>
         createPortal(
           <RadarMarker
             pokemon={pokemon}
+            index={index}
             selected={pokemon.id === selectedPokemonId}
             onSelect={onSelectPokemon}
           />,
           element,
           String(pokemon.id)
+        )
+      )}
+      {leavingNodes.map(({ pokemon, element }, index) =>
+        createPortal(
+          <RadarMarker pokemon={pokemon} index={index} selected={false} onSelect={() => { }} leaving />,
+          element,
+          `leaving-${pokemon.id}`
         )
       )}
 
