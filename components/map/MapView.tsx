@@ -8,6 +8,7 @@ import type { Region } from "@/lib/radar/regions";
 import type { DetectedPokemon } from "@/lib/radar/scan";
 import RadarMarker from "@/components/map/RadarMarker";
 import Icon, { type IconName } from "@/components/ui/Icon";
+import Tooltip from "@/components/ui/Tooltip";
 
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
@@ -169,21 +170,23 @@ export default function MapView({ region, pokemons, selectedPokemonId, onUserLoc
       )}
 
       {/* Controles */}
-      <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
-        <MapButton label="Acercar" onClick={() => mapRef.current?.zoomIn()} icon="plus" />
-        <MapButton label="Alejar" onClick={() => mapRef.current?.zoomOut()} icon="minus" withBorder />
-      </div>
-      <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
-        <MapButton label="Mi ubicación" onClick={locateUser} icon="locate" />
-        <MapButton
-          label="Ver Argentina completa"
-          onClick={() => mapRef.current?.fitBounds(ARGENTINA_VIEW, { padding: 40, duration: 1200 })}
-          icon="map"
-          withBorder
-        />
+      <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">
+        <div className="flex flex-col rounded-md border border-line bg-surface shadow-panel">
+          <MapButton label="Acercar" onClick={() => mapRef.current?.zoomIn()} icon="plus" />
+          <MapButton label="Alejar" onClick={() => mapRef.current?.zoomOut()} icon="minus" withBorder />
+        </div>
+        <div className="flex flex-col rounded-md border border-line bg-surface shadow-panel">
+          <MapButton label="Mi ubicación" onClick={locateUser} icon="locate" />
+          <MapButton
+            label="Ver Argentina completa"
+            onClick={() => mapRef.current?.fitBounds(ARGENTINA_VIEW, { padding: 40, duration: 1200 })}
+            icon="map"
+            withBorder
+          />
+        </div>
       </div>
 
-      <span className="absolute bottom-4 left-4 z-10 inline-flex h-9 items-center gap-2 rounded-md border border-line bg-surface px-3 font-mono text-[13px] text-ink-muted">
+      <span className="absolute bottom-4 left-4 z-10 hidden h-9 items-center gap-2 rounded-md border border-line bg-surface px-3 font-mono text-[13px] text-ink-muted lg:inline-flex">
         Zoom <b className="font-medium text-ink">{zoom.toFixed(1)}</b>
       </span>
     </>
@@ -198,16 +201,15 @@ interface MapButtonProps {
 }
 function MapButton({ label, onClick, icon, withBorder }: MapButtonProps) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className={`grid size-12 place-items-center text-ink transition-colors hover:bg-elevated hover:text-lime ${
-        withBorder ? "border-t border-line" : ""
-      }`}
-    >
-      <Icon name={icon} size={20} />
-    </button>
+    <Tooltip label={label} side="left" className={withBorder ? "border-t border-line" : ""}>
+      <button
+        type="button"
+        aria-label={label}
+        onClick={onClick}
+        className="grid size-12 place-items-center rounded-md text-ink transition-colors hover:bg-elevated hover:text-lime"
+      >
+        <Icon name={icon} size={20} />
+      </button>
+    </Tooltip>
   );
 }
