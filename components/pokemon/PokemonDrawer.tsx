@@ -3,19 +3,21 @@ import Icon from "@/components/ui/Icon";
 import ErrorState from "@/components/ui/ErrorState";
 import PokemonProfile from "@/components/pokemon/PokemonProfile";
 import PokemonProfileSkeleton from "@/components/pokemon/PokemonProfileSkeleton";
+import CopyLinkButton from "@/components/pokemon/CopyLinkButton";
 import { fetchPokemonDetail } from "@/lib/pokemon/client";
 import type { PokemonDetail } from "@/lib/pokemon/utils";
-import CopyLinkButton from "@/components/pokemon/CopyLinkButton";
 
 type Status = "loading" | "ready" | "error";
 
 interface PokemonDrawerProps {
   pokemonId: number;
   regionName: string;
+  /** true mientras se reproduce la animación de salida */
+  closing: boolean;
   onClose: () => void;
 }
 
-export default function PokemonDrawer({ pokemonId, regionName, onClose }: PokemonDrawerProps) {
+export default function PokemonDrawer({ pokemonId, regionName, closing, onClose }: PokemonDrawerProps) {
   const [status, setStatus] = useState<Status>("loading");
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -55,9 +57,11 @@ export default function PokemonDrawer({ pokemonId, regionName, onClose }: Pokemo
     <aside
       aria-label="Ficha del Pokémon"
       aria-busy={status === "loading"}
-      className="fixed inset-0 z-50 flex animate-drawer-in flex-col gap-6 overflow-y-auto bg-surface p-6 lg:absolute lg:inset-y-4 lg:left-auto lg:right-4 lg:z-10 lg:w-105 lg:max-w-[calc(100%-2rem)] lg:rounded-lg lg:border lg:border-line lg:shadow-panel"
+      className={`fixed inset-0 z-50 flex flex-col gap-6 overflow-y-auto scrollbar-none bg-surface p-6 motion-reduce:animate-none lg:absolute lg:inset-y-4 lg:left-auto lg:right-4 lg:z-10 lg:w-120 lg:max-w-[calc(100%-2rem)] lg:rounded-lg lg:border lg:border-line lg:shadow-panel ${
+        closing ? "animate-drawer-out" : "animate-drawer-in"
+      }`}
     >
-      <div className="absolute right-3 top-3 flex items-center gap-1">
+      <div className="absolute right-3 top-3 z-10 flex items-center gap-1">
         {status === "ready" && <CopyLinkButton pokemonId={pokemonId} />}
         <button
           type="button"
@@ -80,7 +84,7 @@ export default function PokemonDrawer({ pokemonId, regionName, onClose }: Pokemo
         />
       )}
 
-      {status === "ready" && pokemon && <PokemonProfile pokemon={pokemon} regionName={regionName} />}
+      {status === "ready" && pokemon && <PokemonProfile pokemon={pokemon} regionName={regionName} stickyFooter />}
     </aside>
   );
 }
