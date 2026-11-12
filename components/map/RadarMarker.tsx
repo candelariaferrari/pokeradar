@@ -1,5 +1,6 @@
 import type { DetectedPokemon } from "@/lib/radar/scan";
-import { formatDexNumber, formatName, spriteUrl } from "@/lib/pokemon/utils";
+import PokemonSprite from "@/components/pokemon/PokemonSprite";
+import { formatDexNumber, formatName } from "@/lib/pokemon/utils";
 
 interface RadarMarkerProps {
   pokemon: DetectedPokemon;
@@ -36,16 +37,7 @@ export default function RadarMarker({ pokemon, selected, onSelect }: RadarMarker
           selected ? "border-lime shadow-glow" : "border-line-strong group-hover:border-lime"
         }`}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={spriteUrl(pokemon.id)}
-          alt=""
-          width={96}
-          height={96}
-          loading="lazy"
-          draggable={false}
-          className="size-[125%] max-w-none object-contain [image-rendering:pixelated]"
-        />
+       <PokemonSprite id={pokemon.id} className="size-[125%]" />
       </span>
     </button>
   );

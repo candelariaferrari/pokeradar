@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 docs/documentacion_ia
+
+# worker de MapLibre (lo genera el script "postinstall")
+/public/maplibre-gl-worker.mjs

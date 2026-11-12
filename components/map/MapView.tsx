@@ -7,6 +7,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Region } from "@/lib/radar/regions";
 import type { DetectedPokemon } from "@/lib/radar/scan";
 import RadarMarker from "@/components/map/RadarMarker";
+import Icon, { type IconName } from "@/components/ui/Icon";
 
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
@@ -168,24 +169,18 @@ export default function MapView({ region, pokemons, selectedPokemonId, onUserLoc
       )}
 
       {/* Controles */}
-      <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">
-        <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
-          <MapButton label="Acercar" onClick={() => mapRef.current?.zoomIn()} path="M12 5v14M5 12h14" />
-          <MapButton label="Alejar" onClick={() => mapRef.current?.zoomOut()} path="M5 12h14" withBorder />
-        </div>
-        <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
-          <MapButton
-            label="Mi ubicación"
-            onClick={locateUser}
-            path="M12 3v3M12 18v3M3 12h3M18 12h3M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"
-          />
-          <MapButton
-            label="Ver Argentina completa"
-            onClick={() => mapRef.current?.fitBounds(ARGENTINA_VIEW, { padding: 40, duration: 1200 })}
-            path="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"
-            withBorder
-          />
-        </div>
+      <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
+        <MapButton label="Acercar" onClick={() => mapRef.current?.zoomIn()} icon="plus" />
+        <MapButton label="Alejar" onClick={() => mapRef.current?.zoomOut()} icon="minus" withBorder />
+      </div>
+      <div className="flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-panel">
+        <MapButton label="Mi ubicación" onClick={locateUser} icon="locate" />
+        <MapButton
+          label="Ver Argentina completa"
+          onClick={() => mapRef.current?.fitBounds(ARGENTINA_VIEW, { padding: 40, duration: 1200 })}
+          icon="map"
+          withBorder
+        />
       </div>
 
       <span className="absolute bottom-4 left-4 z-10 inline-flex h-9 items-center gap-2 rounded-md border border-line bg-surface px-3 font-mono text-[13px] text-ink-muted">
@@ -198,23 +193,21 @@ export default function MapView({ region, pokemons, selectedPokemonId, onUserLoc
 interface MapButtonProps {
   label: string;
   onClick: () => void;
-  path: string;
+  icon: IconName;
   withBorder?: boolean;
 }
-
-function MapButton({ label, onClick, path, withBorder }: MapButtonProps) {
+function MapButton({ label, onClick, icon, withBorder }: MapButtonProps) {
   return (
     <button
       type="button"
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={`grid size-12 place-items-center text-ink transition-colors hover:bg-elevated hover:text-lime ${withBorder ? "border-t border-line" : ""
-        }`}
+      className={`grid size-12 place-items-center text-ink transition-colors hover:bg-elevated hover:text-lime ${
+        withBorder ? "border-t border-line" : ""
+      }`}
     >
-      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" className="fill-none stroke-current" strokeWidth="1.8" strokeLinecap="round">
-        <path d={path} />
-      </svg>
+      <Icon name={icon} size={20} />
     </button>
   );
 }

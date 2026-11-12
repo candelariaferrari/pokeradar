@@ -1,5 +1,6 @@
 import { REGIONS, type RegionId } from "@/lib/radar/regions";
 import TeamPanel from "@/components/layout/TeamPanel";
+import Icon from "@/components/ui/Icon";
 
 interface SidebarProps {
   selectedRegionId: RegionId;
@@ -15,9 +16,7 @@ export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, o
     >
       <label className="relative flex items-center">
         <span className="sr-only">Buscar Pokémon</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="pointer-events-none absolute left-4 fill-none stroke-ink-muted" strokeWidth="1.8" strokeLinecap="round">
-          <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4" />
-        </svg>
+              <Icon name="search" className="pointer-events-none absolute left-4 text-ink-muted" />
         <input
           type="search"
           placeholder="Buscar Pokémon…"

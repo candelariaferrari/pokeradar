@@ -8,6 +8,7 @@ import PokemonDrawer from "@/components/pokemon/PokemonDrawer";
 import { REGIONS, findNearestRegion, type RegionId } from "@/lib/radar/regions";
 import { getPokemonEntry, scanRegion, type DetectedPokemon } from "@/lib/radar/scan";
 import { MAX_FAVORITES, collectionStore, useCollection } from "@/lib/pokemon/collection-store";
+import RadarToolbar from "@/components/map/RadarToolbar";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
@@ -76,32 +77,7 @@ export default function Explorer() {
             onReady={handleScan}
             onUserLocated={handleUserLocated}
           />
-
-          <div className="absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2">
-            <span
-              role="status"
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-medium shadow-panel"
-            >
-              <span aria-hidden="true" className="size-2.5 rounded-full bg-lime shadow-[0_0_0_4px_var(--color-lime-glow)]" />
-              {detected.length > 0 ? (
-                <>
-                  <span className="font-mono">{detected.length}</span> detectados
-                </>
-              ) : (
-                "Escaneando…"
-              )}
-            </span>
-            <button
-              type="button"
-              onClick={handleScan}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold text-on-lime shadow-panel transition-colors hover:bg-lime-soft"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="fill-none stroke-current" strokeWidth="2" strokeLinecap="round">
-                <path d="M12 12l6-6M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5" />
-              </svg>
-              Escanear zona
-            </button>
-          </div>
+          <RadarToolbar detectedCount={detected.length} onScan={handleScan} />
 
           {pokemonId !== null && (
             <PokemonDrawer

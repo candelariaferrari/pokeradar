@@ -1,5 +1,6 @@
+import PokemonSprite from "@/components/pokemon/PokemonSprite";
 import { MAX_FAVORITES } from "@/lib/pokemon/collection-store";
-import { formatName, spriteUrl } from "@/lib/pokemon/utils";
+import { formatName } from "@/lib/pokemon/utils";
 import { getPokemonEntry } from "@/lib/radar/scan";
 
 interface TeamPanelProps {
@@ -29,8 +30,7 @@ export default function TeamPanel({ favorites, onSelectPokemon }: TeamPanelProps
                 aria-label={`Ver ficha de ${formatName(getPokemonEntry(id)?.name ?? String(id))}`}
                 className="grid aspect-square w-full place-items-center overflow-hidden rounded-full border-[1.5px] border-lime bg-surface transition-transform hover:scale-105"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={spriteUrl(id)} alt="" className="size-[130%] max-w-none [image-rendering:pixelated]" />
+                <PokemonSprite id={id} className="size-[130%]" />
               </button>
             ) : (
               <span aria-hidden="true" className="block aspect-square w-full rounded-full border-[1.5px] border-dashed border-line-strong" />
