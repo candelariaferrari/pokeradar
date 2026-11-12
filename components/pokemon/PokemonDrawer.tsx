@@ -5,6 +5,7 @@ import PokemonProfile from "@/components/pokemon/PokemonProfile";
 import PokemonProfileSkeleton from "@/components/pokemon/PokemonProfileSkeleton";
 import { fetchPokemonDetail } from "@/lib/pokemon/client";
 import type { PokemonDetail } from "@/lib/pokemon/utils";
+import CopyLinkButton from "@/components/pokemon/CopyLinkButton";
 
 type Status = "loading" | "ready" | "error";
 
@@ -56,14 +57,17 @@ export default function PokemonDrawer({ pokemonId, regionName, onClose }: Pokemo
       aria-busy={status === "loading"}
       className="absolute inset-y-4 right-4 z-10 flex w-105 max-w-[calc(100%-2rem)] animate-drawer-in flex-col gap-6 overflow-y-auto rounded-lg border border-line bg-surface p-6 shadow-panel"
     >
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Cerrar ficha"
-        className="absolute right-3 top-3 grid size-9 place-items-center rounded-full text-ink-muted hover:bg-elevated hover:text-ink"
-      >
-        <Icon name="close" />
-      </button>
+      <div className="absolute right-3 top-3 flex items-center gap-1">
+        {status === "ready" && <CopyLinkButton pokemonId={pokemonId} />}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar ficha"
+          className="grid size-9 place-items-center rounded-full text-ink-muted hover:bg-elevated hover:text-ink"
+        >
+          <Icon name="close" />
+        </button>
+      </div>
 
       {status === "loading" && <PokemonProfileSkeleton />}
 

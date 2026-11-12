@@ -28,7 +28,7 @@ export default function PokemonProfile({ pokemon, regionName }: PokemonProfilePr
             ))}
           </div>
         </div>
-        <div className="mt-6 grid size-33 place-items-center overflow-hidden rounded-full border-[1.5px] border-line-strong bg-elevated shadow-[0_0_32px_rgb(163_230_53/0.12)]">
+        <div className="mt-10 grid size-33 place-items-center overflow-hidden rounded-full border-[1.5px] border-line-strong bg-elevated shadow-[0_0_32px_rgb(163_230_53/0.12)]">
           <Image
             src={pokemon.artwork}
             alt={formatName(pokemon.name)}

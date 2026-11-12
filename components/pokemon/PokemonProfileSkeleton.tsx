@@ -10,7 +10,7 @@ export default function PokemonProfileSkeleton() {
             <span className="h-8 w-20 animate-pulse rounded-full bg-elevated" />
           </div>
         </div>
-        <span className="mt-6 size-33 animate-pulse rounded-full bg-elevated" />
+        <span className="mt-10 size-33 animate-pulse rounded-full bg-elevated" />
       </div>
       <div className="flex flex-col gap-2">
         <span className="h-3.5 w-full animate-pulse rounded-sm bg-elevated" />
