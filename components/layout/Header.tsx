@@ -1,4 +1,4 @@
-import { MAX_FAVORITES } from "@/lib/collection-store";
+import { MAX_FAVORITES } from "@/lib/pokemon/collection-store";
 
 interface HeaderProps {
   discoveredCount: number;

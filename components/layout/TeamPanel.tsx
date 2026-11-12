@@ -1,6 +1,6 @@
-import { MAX_FAVORITES } from "@/lib/collection-store";
-import { formatName, spriteUrl } from "@/lib/pokemon";
-import { getPokemonEntry } from "@/lib/radar";
+import { MAX_FAVORITES } from "@/lib/pokemon/collection-store";
+import { formatName, spriteUrl } from "@/lib/pokemon/utils";
+import { getPokemonEntry } from "@/lib/radar/scan";
 
 interface TeamPanelProps {
   favorites: number[];

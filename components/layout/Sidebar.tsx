@@ -1,4 +1,4 @@
-import { REGIONS, type RegionId } from "@/lib/regions";
+import { REGIONS, type RegionId } from "@/lib/radar/regions";
 import TeamPanel from "@/components/layout/TeamPanel";
 
 interface SidebarProps {

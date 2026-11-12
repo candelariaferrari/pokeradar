@@ -1,5 +1,5 @@
-import type { DetectedPokemon } from "@/lib/radar";
-import { formatDexNumber, formatName, spriteUrl } from "@/lib/pokemon";
+import type { DetectedPokemon } from "@/lib/radar/scan";
+import { formatDexNumber, formatName, spriteUrl } from "@/lib/pokemon/utils";
 
 interface RadarMarkerProps {
   pokemon: DetectedPokemon;

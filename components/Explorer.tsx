@@ -5,9 +5,9 @@ import dynamic from "next/dynamic";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import PokemonDrawer from "@/components/pokemon/PokemonDrawer";
-import { REGIONS, findNearestRegion, type RegionId } from "@/lib/regions";
-import { getPokemonEntry, scanRegion, type DetectedPokemon } from "@/lib/radar";
-import { MAX_FAVORITES, collectionStore, useCollection } from "@/lib/collection-store";
+import { REGIONS, findNearestRegion, type RegionId } from "@/lib/radar/regions";
+import { getPokemonEntry, scanRegion, type DetectedPokemon } from "@/lib/radar/scan";
+import { MAX_FAVORITES, collectionStore, useCollection } from "@/lib/pokemon/collection-store";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,

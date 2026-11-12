@@ -1,4 +1,4 @@
-import type { PokemonType } from "@/lib/regions";
+import type { PokemonType } from "@/lib/radar/regions";
 
 const TYPES: Record<PokemonType, { label: string; dot: string; solid: string }> = {
   normal:   { label: "Normal",    dot: "bg-type-normal",   solid: "bg-type-normal text-on-lime" },

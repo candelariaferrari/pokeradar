@@ -1,6 +1,6 @@
 import { cacheLife } from "next/cache";
-import { artworkUrl, type PokemonDetail, type StatName } from "./pokemon";
-import type { PokemonType } from "./regions";
+import { artworkUrl, type PokemonDetail, type StatName } from "./utils";
+import type { PokemonType } from "../radar/regions";
 
 const API = "https://pokeapi.co/api/v2";
 

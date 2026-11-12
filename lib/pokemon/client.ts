@@ -1,4 +1,4 @@
-import type { PokemonDetail } from "./pokemon";
+import type { PokemonDetail } from "./utils";
 
 const cache = new Map<number, Promise<PokemonDetail>>();
 

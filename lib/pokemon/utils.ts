@@ -1,4 +1,4 @@
-import type { PokemonType, RegionId } from "./regions";
+import type { PokemonType, RegionId } from "../radar/regions";
 
 export interface PokemonRegionEntry {
   id: number;

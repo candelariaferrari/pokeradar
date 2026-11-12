@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import TypeChip from "@/components/ui/TypeChip";
 import StatBars from "@/components/pokemon/StatBars";
-import { fetchPokemonDetail } from "@/lib/pokemon-client";
-import { formatDexNumber, formatName, type PokemonDetail } from "@/lib/pokemon";
+import { fetchPokemonDetail } from "@/lib/pokemon/client";
+import { formatDexNumber, formatName, type PokemonDetail } from "@/lib/pokemon/utils";
 
 type Status = "loading" | "ready" | "error";
 

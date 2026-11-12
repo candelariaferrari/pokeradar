@@ -1,4 +1,4 @@
-import { STAT_LABELS, type PokemonDetail } from "@/lib/pokemon";
+import { STAT_LABELS, type PokemonDetail } from "@/lib/pokemon/utils";
 
 const MAX_STAT = 180; // el valor que llena la barra entera
 

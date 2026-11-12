@@ -1,5 +1,5 @@
 import pokemonData from "@/data/pokemon-regions.json";
-import type { PokemonRegionEntry } from "./pokemon";
+import type { PokemonRegionEntry } from "../pokemon/utils";
 import type { RegionId } from "./regions";
 import { SPAWN_POINTS } from "./spawn-points";
 

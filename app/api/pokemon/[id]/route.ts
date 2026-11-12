@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPokemonDetail } from "@/lib/pokeapi";
+import { getPokemonDetail } from "@/lib/pokemon/pokeapi";
 
 export async function GET(
   _request: Request,
