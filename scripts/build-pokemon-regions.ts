@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { REGIONS, type PokemonType, type RegionId } from "../lib/regions";
+import type { PokemonRegionEntry } from "../lib/pokemon";
 
 const API = "https://pokeapi.co/api/v2";
 const MAX_ID = 151; // 1.ª generación
@@ -10,12 +11,6 @@ const ALL_TYPES: PokemonType[] = [
   "fire", "water", "grass", "electric", "psychic", "ice", "dragon", "dark", "fairy",
 ];
 
-export interface PokemonRegionEntry {
-  id: number;
-  name: string;
-  types: PokemonType[];
-  region: RegionId;
-}
 
 // --- utilidades ---------------------------------------------------------
 

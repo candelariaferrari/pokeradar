@@ -5,22 +5,37 @@ import dynamic from "next/dynamic";
 import Sidebar from "@/components/layout/Sidebar";
 import PokemonDrawer from "@/components/pokemon/PokemonDrawer";
 import { REGIONS, type RegionId } from "@/lib/regions";
+import { scanRegion, type DetectedPokemon } from "@/lib/radar";
 
-// El mapa solo existe en el navegador: lo cargamos sin SSR
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
   loading: () => <div className="absolute inset-0 animate-pulse bg-surface" />,
 });
 
+const INITIAL_REGION: RegionId = "misiones";
+
 export default function Explorer() {
-  const [regionId, setRegionId] = useState<RegionId>("litoral");
+  const [regionId, setRegionId] = useState<RegionId>(INITIAL_REGION);
+  const [detected, setDetected] = useState<DetectedPokemon[]>([]);
   const [pokemonId, setPokemonId] = useState<number | null>(null);
+  const [discovered, setDiscovered] = useState<Set<number>>(() => new Set());
 
   const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
 
   function handleSelectRegion(id: RegionId) {
     setRegionId(id);
     setPokemonId(null);
+    setDetected(scanRegion(id));
+  }
+
+  function handleScan() {
+    setPokemonId(null);
+    setDetected(scanRegion(regionId));
+  }
+
+  function handleSelectPokemon(id: number) {
+    setPokemonId(id);
+    setDiscovered((prev) => new Set(prev).add(id));
   }
 
   return (
@@ -31,16 +46,43 @@ export default function Explorer() {
         aria-label="Mapa de Argentina"
         className="relative min-h-0 overflow-hidden rounded-lg border border-line bg-deep"
       >
-        <MapView region={region} />
+        <MapView
+          region={region}
+          pokemons={detected}
+          selectedPokemonId={pokemonId}
+          onSelectPokemon={handleSelectPokemon}
+          onReady={handleScan}
+        />
 
-        {/* TEMPORAL: lo reemplazan los marcadores en el paso 5 */}
-        <button
-          type="button"
-          onClick={() => setPokemonId(1)}
-          className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full border border-lime bg-surface px-5 py-2.5 text-sm font-medium hover:bg-lime-glow"
-        >
-          Probar: tocar un Pokémon
-        </button>
+        {/* Radar: contadores + escanear */}
+        <div className="absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2">
+          <span
+            role="status"
+            className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-medium shadow-panel"
+          >
+            <span aria-hidden="true" className="size-2.5 rounded-full bg-lime shadow-[0_0_0_4px_var(--color-lime-glow)]" />
+                        {detected.length > 0 ? (
+              <>
+                <span className="font-mono">{detected.length}</span> detectados
+              </>
+            ) : (
+              "Escaneando…"
+            )}
+          </span>
+          <span className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-medium shadow-panel">
+            <span className="font-mono">{discovered.size}</span> descubiertos
+          </span>
+          <button
+            type="button"
+            onClick={handleScan}
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold text-on-lime shadow-panel transition-colors hover:bg-lime-soft"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className="fill-none stroke-current" strokeWidth="2" strokeLinecap="round">
+              <path d="M12 12l6-6M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5" />
+            </svg>
+            Escanear zona
+          </button>
+        </div>
 
         {pokemonId !== null && (
           <PokemonDrawer key={pokemonId} pokemonId={pokemonId} onClose={() => setPokemonId(null)} />
