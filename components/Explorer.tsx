@@ -7,7 +7,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import PokemonDrawer from "@/components/pokemon/PokemonDrawer";
 import { REGIONS, findNearestRegion, type RegionId } from "@/lib/radar/regions";
 import { getPokemonEntry, scanRegion, type DetectedPokemon } from "@/lib/radar/scan";
-import { MAX_FAVORITES, collectionStore, useCollection } from "@/lib/pokemon/collection-store";
+import { collectionStore, useCollection } from "@/lib/pokemon/collection-store";
 import RadarToolbar from "@/components/map/RadarToolbar";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
@@ -51,7 +51,6 @@ export default function Explorer() {
   // Hábitat del Pokémon abierto (funciona aunque no esté detectado ahora)
   const openEntry = pokemonId !== null ? getPokemonEntry(pokemonId) : undefined;
   const habitat = REGIONS.find((r) => r.id === openEntry?.region) ?? region;
-  const isFavorite = pokemonId !== null && favorites.includes(pokemonId);
 
   return (
     <>
@@ -79,14 +78,11 @@ export default function Explorer() {
           />
           <RadarToolbar detectedCount={detected.length} onScan={handleScan} />
 
-          {pokemonId !== null && (
+           {pokemonId !== null && (
             <PokemonDrawer
               key={pokemonId}
               pokemonId={pokemonId}
               regionName={`${habitat.name} · ${habitat.province}`}
-              isFavorite={isFavorite}
-              favoritesFull={favorites.length >= MAX_FAVORITES}
-              onToggleFavorite={() => collectionStore.toggleFavorite(pokemonId)}
               onClose={() => setPokemonId(null)}
             />
           )}

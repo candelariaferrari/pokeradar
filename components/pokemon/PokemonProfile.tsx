@@ -3,23 +3,16 @@ import Image from "next/image";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import TypeChip from "@/components/ui/TypeChip";
 import StatBars from "@/components/pokemon/StatBars";
+import FavoriteButton from "@/components/pokemon/FavoriteButton";
 import { formatDexNumber, formatName, type PokemonDetail } from "@/lib/pokemon/utils";
+
 
 interface PokemonProfileProps {
   pokemon: PokemonDetail;
   regionName: string;
-  isFavorite: boolean;
-  favoritesFull: boolean;
-  onToggleFavorite: () => void;
 }
 
-export default function PokemonProfile({
-  pokemon,
-  regionName,
-  isFavorite,
-  favoritesFull,
-  onToggleFavorite,
-}: PokemonProfileProps) {
+export default function PokemonProfile({ pokemon, regionName }: PokemonProfileProps) {
   return (
     <>
       <div className="grid grid-cols-[minmax(0,1fr)_132px] items-start gap-4">
@@ -67,16 +60,7 @@ export default function PokemonProfile({
         <p className="text-ink-muted">{regionName}</p>
       </ProfileSection>
 
-      <button
-        type="button"
-        onClick={onToggleFavorite}
-        aria-pressed={isFavorite}
-        disabled={!isFavorite && favoritesFull}
-        className="mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full border-[1.5px] border-lime text-sm font-medium transition-colors hover:bg-lime-glow disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent aria-pressed:bg-lime-glow aria-pressed:text-lime-soft"
-      >
-        <Icon name="heart" filled={isFavorite} />
-        {isFavorite ? "En tu equipo" : favoritesFull ? "Equipo completo (6/6)" : "Agregar al equipo"}
-      </button>
+      <FavoriteButton pokemonId={pokemon.id} />
     </>
   );
 }

@@ -5,19 +5,17 @@ import PokemonProfile from "@/components/pokemon/PokemonProfile";
 import PokemonProfileSkeleton from "@/components/pokemon/PokemonProfileSkeleton";
 import { fetchPokemonDetail } from "@/lib/pokemon/client";
 import type { PokemonDetail } from "@/lib/pokemon/utils";
+import Link from "next/link";
 
 type Status = "loading" | "ready" | "error";
 
 interface PokemonDrawerProps {
   pokemonId: number;
   regionName: string;
-  isFavorite: boolean;
-  favoritesFull: boolean;
-  onToggleFavorite: () => void;
   onClose: () => void;
 }
 
-export default function PokemonDrawer({ pokemonId, onClose, ...profileProps }: PokemonDrawerProps) {
+export default function PokemonDrawer({ pokemonId, regionName, onClose }: PokemonDrawerProps) {
   const [status, setStatus] = useState<Status>("loading");
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -79,7 +77,17 @@ export default function PokemonDrawer({ pokemonId, onClose, ...profileProps }: P
         />
       )}
 
-      {status === "ready" && pokemon && <PokemonProfile pokemon={pokemon} {...profileProps} />}
+      {status === "ready" && pokemon && (
+        <>
+          <PokemonProfile pokemon={pokemon} regionName={regionName} />
+          <Link
+            href={`/pokemon/${pokemon.id}`}
+            className="-mt-2 self-center text-sm text-ink-muted underline-offset-4 hover:text-lime hover:underline"
+          >
+            Abrir ficha completa
+          </Link>
+        </>
+      )}
     </aside>
   );
 }
