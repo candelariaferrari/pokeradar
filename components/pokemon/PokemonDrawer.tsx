@@ -10,10 +10,20 @@ type Status = "loading" | "ready" | "error";
 interface PokemonDrawerProps {
   pokemonId: number;
   regionName: string;
+  isFavorite: boolean;
+  favoritesFull: boolean;
   onClose: () => void;
+  onToggleFavorite: () => void;
 }
 
-export default function PokemonDrawer({ pokemonId, regionName, onClose }: PokemonDrawerProps) {
+export default function PokemonDrawer({
+  pokemonId,
+  regionName,
+  isFavorite,
+  favoritesFull,
+  onToggleFavorite,
+  onClose,
+}: PokemonDrawerProps) {
   const [status, setStatus] = useState<Status>("loading");
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -149,6 +159,18 @@ export default function PokemonDrawer({ pokemonId, regionName, onClose }: Pokemo
             </h3>
             <p className="text-ink-muted">{regionName}</p>
           </section>
+          <button
+            type="button"
+            onClick={onToggleFavorite}
+            aria-pressed={isFavorite}
+            disabled={!isFavorite && favoritesFull}
+            className="mt-auto inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-full border-[1.5px] border-lime text-sm font-medium transition-colors hover:bg-lime-glow disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent aria-pressed:bg-lime-glow aria-pressed:text-lime-soft"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" className={`stroke-current ${isFavorite ? "fill-current" : "fill-none"}`} strokeWidth="1.8" strokeLinejoin="round">
+              <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
+            </svg>
+            {isFavorite ? "En tu equipo" : favoritesFull ? "Equipo completo (6/6)" : "Agregar al equipo"}
+          </button>
         </>
       )}
     </aside>

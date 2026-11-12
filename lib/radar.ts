@@ -27,3 +27,8 @@ export function scanRegion(regionId: RegionId, count = 8): DetectedPokemon[] {
 
   return pool.slice(0, total).map((pokemon, i) => ({ ...pokemon, position: points[i] }));
 }
+
+/** Datos básicos de cualquier Pokémon (aunque no esté detectado ahora) */
+export function getPokemonEntry(id: number): PokemonRegionEntry | undefined {
+  return ALL_POKEMON.find((p) => p.id === id);
+}
