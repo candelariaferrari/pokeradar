@@ -2,6 +2,7 @@ import { REGIONS, type RegionId } from "@/lib/radar/regions";
 import TeamPanel from "@/components/layout/TeamPanel";
 import PokemonSearch from "@/components/layout/PokemonSearch";
 import RegionThumbnail from "@/components/layout/RegionThumbnail";
+import RegionWeather from "@/components/layout/RegionWeather";
 
 interface SidebarProps {
   selectedRegionId: RegionId;
@@ -37,11 +38,12 @@ export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, o
                   }`}
               >
                 <RegionThumbnail regionId={region.id} />
-                <span className="flex flex-col">
+                <span className="flex min-w-0 flex-col">
                   <span className="text-[15px] font-medium">{region.name}</span>
                   <span className="text-xs text-ink-muted">
                     {region.province} · {region.biome}
                   </span>
+                  {isSelected && <RegionWeather regionId={region.id} />}
                 </span>
               </button>
             </li>
