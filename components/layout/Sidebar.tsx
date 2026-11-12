@@ -1,28 +1,22 @@
 import { REGIONS, type RegionId } from "@/lib/radar/regions";
 import TeamPanel from "@/components/layout/TeamPanel";
-import Icon from "@/components/ui/Icon";
+import PokemonSearch from "@/components/layout/PokemonSearch";
 
 interface SidebarProps {
   selectedRegionId: RegionId;
   favorites: number[];
   onSelectRegion: (id: RegionId) => void;
   onSelectPokemon: (id: number) => void;
+  onSearchSelect: (id: number) => void;
 }
 
-export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, onSelectPokemon }: SidebarProps) {  return (
-    <aside
+export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, onSelectPokemon, onSearchSelect }: SidebarProps) {  
+  return (
+  <aside
       aria-label="Exploración"
       className="hidden min-h-0 flex-col gap-4 rounded-lg border border-line bg-surface p-5 lg:flex"
     >
-      <label className="relative flex items-center">
-        <span className="sr-only">Buscar Pokémon</span>
-              <Icon name="search" className="pointer-events-none absolute left-4 text-ink-muted" />
-        <input
-          type="search"
-          placeholder="Buscar Pokémon…"
-          className="h-12 w-full rounded-full border border-line-strong bg-elevated pl-11 pr-4 text-[15px] placeholder:text-ink-muted focus:border-lime focus:outline-none focus:ring-4 focus:ring-lime-glow"
-        />
-      </label>
+      <PokemonSearch onSelect={onSearchSelect} />
 
       <h2 className="text-lg font-semibold">Regiones de Argentina</h2>
 
