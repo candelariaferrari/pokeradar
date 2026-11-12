@@ -34,6 +34,11 @@
   --color-type-flying: #9DB4E8;
   --color-type-ice: #8FD8E0;
   --color-type-dragon: #8B78F0;
+  --color-type-fighting: #E0705C;
+  --color-type-ghost: #8E7CC8;
+  --color-type-steel: #9FB1BD;
+  --color-type-dark: #A08A78;
+  --color-type-fairy: #F4A7C9;
 
   /* Radios y sombras */
   --radius-sm: 8px;

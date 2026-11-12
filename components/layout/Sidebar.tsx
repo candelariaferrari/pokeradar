@@ -1,12 +1,14 @@
-import { REGIONS, type RegionId } from "@/lib/regions";
+import { REGIONS, type RegionId } from "@/lib/radar/regions";
+import TeamPanel from "@/components/layout/TeamPanel";
 
 interface SidebarProps {
   selectedRegionId: RegionId;
+  favorites: number[];
   onSelectRegion: (id: RegionId) => void;
+  onSelectPokemon: (id: number) => void;
 }
 
-export default function Sidebar({ selectedRegionId, onSelectRegion }: SidebarProps) {
-  return (
+export default function Sidebar({ selectedRegionId, onSelectRegion, favorites, onSelectPokemon }: SidebarProps) {  return (
     <aside
       aria-label="Exploración"
       className="hidden min-h-0 flex-col gap-4 rounded-lg border border-line bg-surface p-5 lg:flex"
@@ -52,6 +54,7 @@ export default function Sidebar({ selectedRegionId, onSelectRegion }: SidebarPro
           );
         })}
       </ul>
+      <TeamPanel favorites={favorites} onSelectPokemon={onSelectPokemon} />
     </aside>
   );
 }

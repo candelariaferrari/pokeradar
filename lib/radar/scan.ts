@@ -1,5 +1,5 @@
 import pokemonData from "@/data/pokemon-regions.json";
-import type { PokemonRegionEntry } from "./pokemon";
+import type { PokemonRegionEntry } from "../pokemon/utils";
 import type { RegionId } from "./regions";
 import { SPAWN_POINTS } from "./spawn-points";
 
@@ -26,4 +26,9 @@ export function scanRegion(regionId: RegionId, count = 8): DetectedPokemon[] {
   const total = Math.min(count, pool.length, points.length);
 
   return pool.slice(0, total).map((pokemon, i) => ({ ...pokemon, position: points[i] }));
+}
+
+/** Datos básicos de cualquier Pokémon (aunque no esté detectado ahora) */
+export function getPokemonEntry(id: number): PokemonRegionEntry | undefined {
+  return ALL_POKEMON.find((p) => p.id === id);
 }

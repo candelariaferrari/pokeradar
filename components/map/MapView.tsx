@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Region } from "@/lib/regions";
-import type { DetectedPokemon } from "@/lib/radar";
+import type { Region } from "@/lib/radar/regions";
+import type { DetectedPokemon } from "@/lib/radar/scan";
 import RadarMarker from "@/components/map/RadarMarker";
 
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
