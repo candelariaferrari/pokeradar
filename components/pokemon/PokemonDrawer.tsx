@@ -5,7 +5,6 @@ import PokemonProfile from "@/components/pokemon/PokemonProfile";
 import PokemonProfileSkeleton from "@/components/pokemon/PokemonProfileSkeleton";
 import { fetchPokemonDetail } from "@/lib/pokemon/client";
 import type { PokemonDetail } from "@/lib/pokemon/utils";
-import Link from "next/link";
 
 type Status = "loading" | "ready" | "error";
 
@@ -77,17 +76,7 @@ export default function PokemonDrawer({ pokemonId, regionName, onClose }: Pokemo
         />
       )}
 
-      {status === "ready" && pokemon && (
-        <>
-          <PokemonProfile pokemon={pokemon} regionName={regionName} />
-          <Link
-            href={`/pokemon/${pokemon.id}`}
-            className="-mt-2 self-center text-sm text-ink-muted underline-offset-4 hover:text-lime hover:underline"
-          >
-            Abrir ficha completa
-          </Link>
-        </>
-      )}
+      {status === "ready" && pokemon && <PokemonProfile pokemon={pokemon} regionName={regionName} />}
     </aside>
   );
 }
