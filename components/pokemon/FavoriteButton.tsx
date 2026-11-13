@@ -3,10 +3,10 @@
 import Icon from "@/components/ui/Icon";
 import { MAX_FAVORITES, collectionStore, useCollection } from "@/lib/pokemon/collection-store";
 import Tooltip from "@/components/ui/Tooltip";
+import { playSound } from "@/lib/sound/sound";
 
 interface FavoriteButtonProps {
   pokemonId: number;
-  /** Solo el corazón (para la vista previa en mobile) */
   compact?: boolean;
 }
 
@@ -22,7 +22,12 @@ export default function FavoriteButton({ pokemonId, compact = false }: FavoriteB
 
   const shared = {
     type: "button" as const,
-    onClick: () => collectionStore.toggleFavorite(pokemonId),
+    onClick: () => {
+      const wasFavorite = isFavorite;
+      if (collectionStore.toggleFavorite(pokemonId)) {
+        playSound(wasFavorite ? "favoriteRemove" : "favoriteAdd");
+      }
+    },
     "aria-pressed": isFavorite,
     disabled: !isFavorite && isFull,
   };

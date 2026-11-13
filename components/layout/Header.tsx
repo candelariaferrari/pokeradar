@@ -2,6 +2,7 @@ import Icon from "@/components/ui/Icon";
 import Pill, { RadarDot } from "@/components/ui/Pill";
 import Tooltip from "@/components/ui/Tooltip";
 import { MAX_FAVORITES } from "@/lib/pokemon/collection-store";
+import SoundToggle from "@/components/layout/SoundToggle";
 
 interface HeaderProps {
   discoveredCount: number;
@@ -29,6 +30,7 @@ export default function Header({ discoveredCount, favoritesCount, teamOpen, onTe
       </div>
 
       <div className="flex items-center gap-2 lg:gap-3">
+        <SoundToggle />
         <span className="hidden md:block">
           <Pill>
             <RadarDot />

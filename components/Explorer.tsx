@@ -19,6 +19,7 @@ import TeamPanel from "@/components/layout/TeamPanel";
 import { useRegionWeather } from "@/lib/hooks/use-region-weather";
 import { fetchRegionWeather, getCachedWeather } from "@/lib/radar/weather-client";
 import { weatherBoost } from "@/lib/radar/weather-boost";
+import { playSound } from "@/lib/sound/sound";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
@@ -32,14 +33,14 @@ export default function Explorer() {
   const [typeFilter, setTypeFilter] = useState<PokemonType | null>(null);
   const [detected, setDetected] = useState<DetectedPokemon[]>([]);
   const [pokemonId, setPokemonId] = useState<number | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false); // ficha completa en mobile
-  const [regionsOpen, setRegionsOpen] = useState(false); // hoja de regiones en mobile
-  const [teamOpen, setTeamOpen] = useState(false); // equipo abajo del mapa en mobile
+  const [detailOpen, setDetailOpen] = useState(false); 
+  const [regionsOpen, setRegionsOpen] = useState(false); 
+  const [teamOpen, setTeamOpen] = useState(false); 
   const { discovered, favorites } = useCollection();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const currentWeather = useRegionWeather(regionId);
   const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
-  const [leaving, setLeaving] = useState<DetectedPokemon[]>([]); // salen con animación
+  const [leaving, setLeaving] = useState<DetectedPokemon[]>([]); 
   const [drawerClosing, setDrawerClosing] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -78,13 +79,14 @@ export default function Explorer() {
   }
 
   function handleTypeFilter(type: PokemonType | null) {
+    playSound("scan");
     setTypeFilter(type);
     setPokemonId(null);
     scan(regionId, { type });
   }
 
-  /** Tocar un marcador: en desktop abre la ficha; en mobile, la vista previa */
   function handleSelectPokemon(id: number) {
+    playSound("select");
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setDrawerClosing(false);
     setPokemonId(id);
@@ -92,7 +94,6 @@ export default function Explorer() {
     collectionStore.discover(id);
   }
 
-  /** Desde "Tu equipo" se va directo a la ficha (también en mobile) */
   function handleOpenFromTeam(id: number) {
     handleSelectPokemon(id);
     setDetailOpen(true);
@@ -117,10 +118,9 @@ export default function Explorer() {
   function finishCloseDrawer() {
     setDrawerClosing(false);
     if (isDesktop) setPokemonId(null);
-    else setDetailOpen(false); // en mobile vuelve a la vista previa
+    else setDetailOpen(false); 
   }
 
-  /** Reproduce la salida y recién después cierra */
   function closeDrawer() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       finishCloseDrawer();
@@ -128,16 +128,24 @@ export default function Explorer() {
     }
     setDrawerClosing(true);
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(finishCloseDrawer, 220); // misma duración que drawer-out
+    closeTimer.current = setTimeout(finishCloseDrawer, 220); 
   }
 
-  /** Clic en una parte vacía del mapa */
   function handleMapClick() {
     if (pokemonId === null) return;
     if (isDesktop) closeDrawer();
-    else setPokemonId(null); // en mobile cierra la vista previa
+    else setPokemonId(null); 
+  }
+  
+  function handleScanClick() {
+    playSound("scan");
+    handleScan();
   }
 
+  function handleUserSelectRegion(id: RegionId) {
+    playSound("scan");
+    handleSelectRegion(id);
+  }
   const openEntry = pokemonId !== null ? getPokemonEntry(pokemonId) : undefined;
   const habitat = REGIONS.find((r) => r.id === openEntry?.region) ?? region;
   const showDrawer = pokemonId !== null && (isDesktop || detailOpen);
@@ -157,7 +165,7 @@ export default function Explorer() {
         favoritesCount={favorites.length}
         teamOpen={teamOpen && !isDesktop}
         onTeamClick={() => {
-          if (isDesktop) return; // en desktop el equipo ya está siempre visible en el sidebar
+          if (isDesktop) return; 
           setPokemonId(null);
           setTeamOpen((open) => !open);
         }}
