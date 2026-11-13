@@ -8,7 +8,8 @@
     "build:pokemon": "tsx scripts/build-pokemon-regions.ts",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs public/"
+    "postinstall": "cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs public/",
+    "test": "vitest run"
   },
   "dependencies": {
     "maplibre-gl": "^6.17.0",
@@ -25,6 +26,7 @@
     "eslint-config-next": "16.4.6",
     "tailwindcss": "4.3.3",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }
