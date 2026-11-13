@@ -3,6 +3,7 @@ import PokemonSearch from "@/components/layout/PokemonSearch";
 import RegionThumbnail from "@/components/layout/RegionThumbnail";
 import RegionWeather from "@/components/layout/RegionWeather";
 import TeamPanel from "@/components/layout/TeamPanel";
+import type { CSSProperties } from "react";
 
 export interface SidebarContentProps {
   selectedRegionId: RegionId;
@@ -13,7 +14,6 @@ export interface SidebarContentProps {
   onSearchSelect: (id: number) => void;
 }
 
-/** Buscador + regiones + equipo. Lo usan el sidebar (desktop) y la hoja (mobile). */
 export default function SidebarContent({
   selectedRegionId,
   favorites,
@@ -37,9 +37,10 @@ export default function SidebarContent({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => onSelectRegion(region.id)}
+                style={{ "--region-color": `var(--color-type-${region.types[0]})` } as CSSProperties}
                 className={`flex w-full items-center gap-3 rounded-md border-[1.5px] p-1 pr-3 text-left transition-colors ${isSelected
-                    ? "border-lime bg-lime-glow shadow-[0_0_16px_rgb(163_230_53/0.18)]"
-                    : "border-transparent bg-elevated hover:border-line-strong"
+                  ? "border-lime bg-lime-glow shadow-[0_0_16px_rgb(163_230_53/0.18)]"
+                  : "border-(--region-color)/35 bg-elevated hover:border-(--region-color)"
                   }`}
               >
                 <RegionThumbnail regionId={region.id} />

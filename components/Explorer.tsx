@@ -34,14 +34,14 @@ export default function Explorer() {
   const [typeFilter, setTypeFilter] = useState<PokemonType | null>(null);
   const [detected, setDetected] = useState<DetectedPokemon[]>([]);
   const [pokemonId, setPokemonId] = useState<number | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false); 
-  const [regionsOpen, setRegionsOpen] = useState(false); 
-  const [teamOpen, setTeamOpen] = useState(false); 
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [regionsOpen, setRegionsOpen] = useState(false);
+  const [teamOpen, setTeamOpen] = useState(false);
   const { discovered, favorites } = useCollection();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const currentWeather = useRegionWeather(regionId);
   const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
-  const [leaving, setLeaving] = useState<DetectedPokemon[]>([]); 
+  const [leaving, setLeaving] = useState<DetectedPokemon[]>([]);
   const [drawerClosing, setDrawerClosing] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,18 +49,18 @@ export default function Explorer() {
   useEffect(() => {
     const prefetch = () =>
       REGIONS.forEach((r) => {
-        fetchRegionWeather(r.id).catch(() => {});
+        fetchRegionWeather(r.id).catch(() => { });
       });
 
     if ("requestIdleCallback" in window) {
       const id = window.requestIdleCallback(prefetch, { timeout: 3000 });
       return () => window.cancelIdleCallback(id);
     }
-    const id = setTimeout(prefetch, 1500); // Safari viejo no tiene requestIdleCallback
+    const id = setTimeout(prefetch, 1500); 
     return () => clearTimeout(id);
   }, []);
 
-  // Al desmontar, cancelar temporizadores pendientes
+
   useEffect(() => {
     return () => {
       if (leaveTimer.current) clearTimeout(leaveTimer.current);
@@ -70,28 +70,32 @@ export default function Explorer() {
 
   function scan(id: RegionId, options?: Parameters<typeof scanRegion>[1]) {
     const boost = weatherBoost(getCachedWeather(id))?.types; // el clima favorece algunos tipos
+    const found = scanRegion(id, { ...options, boost });
     setLeaving(detected);
-    setDetected(scanRegion(id, { ...options, boost }));
+    setDetected(found);
     if (leaveTimer.current) clearTimeout(leaveTimer.current);
     leaveTimer.current = setTimeout(() => setLeaving([]), 400);
+    return found.length;
   }
+
   function handleSelectRegion(id: RegionId) {
     setRegionId(id);
     setTypeFilter(null);
     setPokemonId(null);
-    scan(id);
+    return scan(id);
   }
 
   function handleScan() {
     setPokemonId(null);
-    scan(regionId, { type: typeFilter });
+    return scan(regionId, { type: typeFilter });
   }
 
   function handleTypeFilter(type: PokemonType | null) {
-    playSound("scan");
     setTypeFilter(type);
     setPokemonId(null);
-    scan(regionId, { type });
+    const count = scan(regionId, { type });
+    playSound("scan");
+    playSound("detect", count);
   }
 
   function handleSelectPokemon(id: number) {
@@ -127,7 +131,7 @@ export default function Explorer() {
   function finishCloseDrawer() {
     setDrawerClosing(false);
     if (isDesktop) setPokemonId(null);
-    else setDetailOpen(false); 
+    else setDetailOpen(false);
   }
 
   function closeDrawer() {
@@ -137,24 +141,27 @@ export default function Explorer() {
     }
     setDrawerClosing(true);
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(finishCloseDrawer, 220); 
+    closeTimer.current = setTimeout(finishCloseDrawer, 220);
   }
 
   function handleMapClick() {
     if (pokemonId === null) return;
     if (isDesktop) closeDrawer();
-    else setPokemonId(null); 
+    else setPokemonId(null);
   }
-  
+
   function handleScanClick() {
+    const count = handleScan();
     playSound("scan");
-    handleScan();
+    playSound("detect", count);
   }
 
   function handleUserSelectRegion(id: RegionId) {
-    playSound("scan");
-    handleSelectRegion(id);
+    const count = handleSelectRegion(id);
+    playSound("travel");
+    playSound("detect", count);
   }
+
   const openEntry = pokemonId !== null ? getPokemonEntry(pokemonId) : undefined;
   const habitat = REGIONS.find((r) => r.id === openEntry?.region) ?? region;
   const showDrawer = pokemonId !== null && (isDesktop || detailOpen);
@@ -162,7 +169,7 @@ export default function Explorer() {
   const sidebarProps: SidebarContentProps = {
     selectedRegionId: regionId,
     favorites,
-    onSelectRegion: handleSelectRegion,
+    onSelectRegion: handleUserSelectRegion,
     onSelectPokemon: handleOpenFromTeam,
     onSearchSelect: handleSearchSelect,
   };
@@ -174,7 +181,7 @@ export default function Explorer() {
         favoritesCount={favorites.length}
         teamOpen={teamOpen && !isDesktop}
         onTeamClick={() => {
-          if (isDesktop) return; 
+          if (isDesktop) return;
           setPokemonId(null);
           setTeamOpen((open) => !open);
         }}
@@ -197,12 +204,13 @@ export default function Explorer() {
             onReady={handleScan}
             onUserLocated={handleUserLocated}
             onMapClick={handleMapClick}
+            onSelectRegion={handleUserSelectRegion}
             focusOffsetX={isDesktop ? -250 : 0}
           />
 
           <RadarToolbar
             detectedCount={detected.length}
-            onScan={handleScan}
+            onScan={handleScanClick}
             types={typesAvailableIn(regionId)}
             typeFilter={typeFilter}
             onTypeFilter={handleTypeFilter}
@@ -243,7 +251,7 @@ export default function Explorer() {
         <MobileRegionsSheet
           {...sidebarProps}
           onSelectRegion={(id) => {
-            handleSelectRegion(id);
+            handleUserSelectRegion(id);
             setRegionsOpen(false);
           }}
           onSelectPokemon={(id) => {

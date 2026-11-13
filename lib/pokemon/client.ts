@@ -12,7 +12,7 @@ export function fetchPokemonDetail(id: number): Promise<PokemonDetail> {
       return (await res.json()) as PokemonDetail;
     })
     .catch((error) => {
-      cache.delete(id); // si falló, que el próximo intento vuelva a pedir
+      cache.delete(id); 
       throw error;
     });
 

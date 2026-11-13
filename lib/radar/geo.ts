@@ -1,5 +1,5 @@
-import type { Feature, Polygon } from "geojson";
-import { REGIONS, distanceKm, type RegionId } from "./regions";
+import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
+import { REGIONS, distanceKm, type Region, type RegionId } from "./regions";
 import { SPAWN_POINTS } from "./spawn-points";
 
 /** Círculo aproximado (polígono de N lados) alrededor de un punto, en km */
@@ -11,7 +11,6 @@ export function circlePolygon([lng, lat]: [number, number], radiusKm: number, st
   for (let i = 0; i <= steps; i++) {
     const angle = (i / steps) * 2 * Math.PI;
     coordinates.push([
-      // un grado de longitud mide menos cuanto más al sur: lo corregimos con cos(latitud)
       lng + (radiusKm / (KM_PER_DEGREE * Math.cos(latRad))) * Math.cos(angle),
       lat + (radiusKm / KM_PER_DEGREE) * Math.sin(angle),
     ]);
@@ -20,7 +19,6 @@ export function circlePolygon([lng, lat]: [number, number], radiusKm: number, st
   return { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [coordinates] } };
 }
 
-/** Radio de la zona: el punto de aparición más lejano + un margen */
 export function regionRadiusKm(regionId: RegionId): number {
   const region = REGIONS.find((r) => r.id === regionId);
   if (!region) return 50;
@@ -28,8 +26,28 @@ export function regionRadiusKm(regionId: RegionId): number {
   return farthest * 1.25 + 5;
 }
 
-/** La zona de exploración de una región, lista para dibujar */
 export function regionArea(regionId: RegionId): Feature<Polygon> {
   const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
   return circlePolygon(region.center, regionRadiusKm(regionId));
+}
+
+export function regionsOverview(colorOf: (region: Region) => string) {
+  const areas: FeatureCollection<Polygon> = {
+    type: "FeatureCollection",
+    features: REGIONS.map((region) => ({
+      ...regionArea(region.id),
+      properties: { id: region.id, color: colorOf(region) },
+    })),
+  };
+
+  const labels: FeatureCollection<Point> = {
+    type: "FeatureCollection",
+    features: REGIONS.map((region) => ({
+      type: "Feature" as const,
+      properties: { id: region.id, name: region.name, color: colorOf(region) },
+      geometry: { type: "Point" as const, coordinates: region.center },
+    })),
+  };
+
+  return { areas, labels };
 }

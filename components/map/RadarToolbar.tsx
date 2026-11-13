@@ -46,7 +46,7 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
           Escanear zona
         </button>
 
-        {/* Mobile: solo el ícono del clima; el lugar queda reservado aunque todavía no llegó */}
+        {/* Mobile: solo el ícono del clima;*/}
         <span className="lg:hidden">
           {boost ? (
             <Tooltip label={boostText}>

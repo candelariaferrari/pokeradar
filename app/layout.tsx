@@ -10,6 +10,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pokeradar-candeferrari.vercel.app"),
   title: "PokéradAR",
   description: "Explorá Argentina y descubrí qué Pokémon habitan cada región.",
 };

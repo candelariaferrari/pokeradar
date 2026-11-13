@@ -23,7 +23,7 @@ export default function CopyLinkButton({ pokemonId }: { pokemonId: number }) {
       await navigator.clipboard.writeText(url);
       setStatus("copied");
     } catch {
-      setStatus("error"); // por ejemplo, si el navegador no da permiso
+      setStatus("error"); 
     }
 
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -34,7 +34,6 @@ export default function CopyLinkButton({ pokemonId }: { pokemonId: number }) {
 
   return (
     <div className="relative flex items-center">
-      {/* Aviso: aparece a la izquierda del botón y lo leen los lectores de pantalla */}
       <span
         role="status"
         className={`pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-full bg-elevated px-3 py-1 text-xs font-medium transition-opacity ${status === "idle" ? "opacity-0" : "opacity-100"

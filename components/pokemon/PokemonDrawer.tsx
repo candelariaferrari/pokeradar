@@ -12,7 +12,6 @@ type Status = "loading" | "ready" | "error";
 interface PokemonDrawerProps {
   pokemonId: number;
   regionName: string;
-  /** true mientras se reproduce la animación de salida */
   closing: boolean;
   onClose: () => void;
 }
@@ -22,7 +21,6 @@ export default function PokemonDrawer({ pokemonId, regionName, closing, onClose 
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [attempt, setAttempt] = useState(0);
 
-  // Pedir los datos (y volver a pedirlos con "Reintentar")
   useEffect(() => {
     let cancelled = false;
     fetchPokemonDetail(pokemonId)
@@ -39,7 +37,6 @@ export default function PokemonDrawer({ pokemonId, regionName, closing, onClose 
     };
   }, [pokemonId, attempt]);
 
-  // Cerrar con Escape
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
