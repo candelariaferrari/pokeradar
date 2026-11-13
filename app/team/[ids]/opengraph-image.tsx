@@ -48,7 +48,6 @@ export default async function TeamImage({ params }: { params: Promise<{ ids: str
                   background: "#25352A",
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={artworkUrl(pokemon.id)} width={128} height={128} alt="" />
               </div>
               <div style={{ display: "flex", fontSize: 24 }}>{formatName(pokemon.name)}</div>

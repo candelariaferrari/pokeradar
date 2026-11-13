@@ -16,6 +16,15 @@ let state: Collection = EMPTY;
 let loaded = false;
 const listeners = new Set<() => void>();
 
+/** Ids válidos de la Pokédex (1–151), sin repetidos. Descarta todo lo demás */
+function toIds(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  const ids = value.filter(
+    (id): id is number => typeof id === "number" && Number.isInteger(id) && id >= 1 && id <= 151
+  );
+  return [...new Set(ids)];
+}
+
 /** Lee localStorage una sola vez (y valida lo que encuentra) */
 function load() {
   if (loaded) return;
@@ -23,10 +32,11 @@ function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
-    const parsed = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return;
     state = {
-      discovered: Array.isArray(parsed.discovered) ? parsed.discovered : [],
-      favorites: Array.isArray(parsed.favorites) ? parsed.favorites.slice(0, MAX_FAVORITES) : [],
+      discovered: toIds("discovered" in parsed ? parsed.discovered : undefined),
+      favorites: toIds("favorites" in parsed ? parsed.favorites : undefined).slice(0, MAX_FAVORITES),
     };
   } catch {
     // Modo privado, datos corruptos, etc.: arrancamos de cero sin romper la app

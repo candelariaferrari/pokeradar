@@ -60,7 +60,7 @@ La **afinidad** decide a qué región va cada Pokémon. Como muchos tienen dos t
 | Librería | Para qué | Por qué esta |
 |---|---|---|
 | **Next.js 16 (App Router)** | Rutas, Server Components, caché | Pedido por el desafío. Uso `"use cache"` y `cacheLife` (Cache Components). |
-| **TypeScript estricto** | Tipado | `strict: true` y ningún `any` en el proyecto. |
+| **TypeScript estricto** | Tipado | `strict: true`, sin `any`. Lo que llega de `localStorage` o de la URL se valida con type guards; las respuestas de las APIs se tipan al entrar (ver Próximos pasos). |
 | **Tailwind CSS v4** | Estilos | Los tokens del design system viven en `@theme` y cada token es una clase (`bg-surface`, `bg-type-fire`). |
 | **MapLibre GL 6 + OpenFreeMap** | Mapa vectorial | Open source y sin API key. Permite estilos data-driven (cada región pinta su color con `["get", "color"]`). |
 | **Web Audio API** | Efectos de sonido | Se generan con osciladores: no hay archivos que descargar ni licencias. |
@@ -195,6 +195,9 @@ También hubo decisiones de producto que salieron de usarla: sumar color porque 
 
 **Técnica**
 
+- **Validación en runtime con zod** de las respuestas de PokéAPI y Open-Meteo, en lugar de tiparlas con `as` al entrar: si una API cambia su formato, el error aparece en el borde y no en la interfaz.
+- **Ficha mobile como `<dialog>`**, igual que el modal del equipo, con el foco atrapado mientras está abierta.
+- **Marcadores:** crear los nodos del DOM de MapLibre en un efecto en vez de en `useMemo`, que en React debería ser puro.
 - **Más tests:** componentes con Testing Library y un e2e con Playwright del recorrido principal (explorar, escanear, sumar al equipo, compartir).
 - **CI** con GitHub Actions: lint, tipos, tests y build en cada PR.
 - **Performance mobile:** cargar el mapa después de la primera interacción o con una vista previa estática, y medir con PageSpeed Insights en producción.
