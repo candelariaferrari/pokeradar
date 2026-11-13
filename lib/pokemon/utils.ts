@@ -12,6 +12,9 @@ const SPRITES = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprite
 /** Sprite chico (96px) */
 export const spriteUrl = (id: number) => `${SPRITES}/${id}.png`;
 
+/** Sprite animado (estilo Nintendo DS): se mueve en su lugar */
+export const animatedSpriteUrl = (id: number) => `${SPRITES}/versions/generation-v/black-white/animated/${id}.gif`;
+
 /** Ilustración oficial grande */
 export const artworkUrl = (id: number) => `${SPRITES}/other/official-artwork/${id}.png`;
 
