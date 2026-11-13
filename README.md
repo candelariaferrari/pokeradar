@@ -144,7 +144,7 @@ No hace falta ninguna variable de entorno: la PokéAPI y Open-Meteo no usan API 
 
 ## 3. Uso de Inteligencia Artificial (AI-Native Workflow)
 
-**Herramienta:** Claude (Cowork), como pair programmer durante todo el proyecto.
+**Herramienta:** Claude, como pair programmer durante todo el proyecto.
 
 **Cómo trabajé:**
 
