@@ -3,6 +3,7 @@ import Pill, { RadarDot } from "@/components/ui/Pill";
 import Tooltip from "@/components/ui/Tooltip";
 import { MAX_FAVORITES } from "@/lib/pokemon/collection-store";
 import SoundToggle from "@/components/layout/SoundToggle";
+import { useHydrated } from "@/lib/hooks/use-hydrated";
 
 interface HeaderProps {
   discoveredCount: number;
@@ -12,6 +13,8 @@ interface HeaderProps {
 }
 
 export default function Header({ discoveredCount, favoritesCount, teamOpen, onTeamClick }: HeaderProps) {
+  const hydrated = useHydrated();
+  const numberSkeleton = <span aria-hidden="true" className="inline-block h-3.5 w-5 animate-pulse rounded-sm bg-line-strong" />;
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-line px-4 lg:h-20 lg:px-6">
       <div className="flex items-center gap-3">
@@ -41,7 +44,7 @@ export default function Header({ discoveredCount, favoritesCount, teamOpen, onTe
         <Tooltip label="Pokémon descubiertos">
           <Pill>
             <Icon name="star" size={16} filled className="text-type-electric" />
-            <span className="font-mono">{discoveredCount}</span>
+            {hydrated ? <span className="font-mono">{discoveredCount}</span> : numberSkeleton}
             <span className="hidden sm:inline">descubiertos</span>
             <span className="sr-only sm:hidden">Pokémon descubiertos</span>
           </Pill>
@@ -53,15 +56,18 @@ export default function Header({ discoveredCount, favoritesCount, teamOpen, onTe
             onClick={onTeamClick}
             aria-expanded={teamOpen}
             aria-label={`Tu equipo: ${favoritesCount} de ${MAX_FAVORITES}`}
-            className={`inline-flex h-9 items-center gap-2 rounded-full border-[1.5px] border-lime px-3 text-sm font-medium transition-colors hover:bg-lime-glow lg:px-4 ${
-              teamOpen ? "bg-lime-glow" : ""
-            }`}
+            className={`inline-flex h-9 items-center gap-2 rounded-full border-[1.5px] border-lime px-3 text-sm font-medium transition-colors hover:bg-lime-glow lg:px-4 ${teamOpen ? "bg-lime-glow" : ""
+              }`}
           >
             <Icon name="heart" size={16} filled className="text-lime" />
             <span className="hidden sm:inline">Mi equipo</span>
-            <span className="font-mono">
-              {favoritesCount}/{MAX_FAVORITES}
-            </span>
+            {hydrated ? (
+              <span className="font-mono">
+                {favoritesCount}/{MAX_FAVORITES}
+              </span>
+            ) : (
+              numberSkeleton
+            )}
           </button>
         </Tooltip>
       </div>

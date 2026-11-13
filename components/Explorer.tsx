@@ -20,10 +20,11 @@ import { useRegionWeather } from "@/lib/hooks/use-region-weather";
 import { fetchRegionWeather, getCachedWeather } from "@/lib/radar/weather-client";
 import { weatherBoost } from "@/lib/radar/weather-boost";
 import { playSound } from "@/lib/sound/sound";
+import MapLoading from "@/components/map/MapLoading";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
-  loading: () => <div className="absolute inset-0 animate-pulse bg-surface" />,
+  loading: () => <MapLoading />,
 });
 
 const INITIAL_REGION: RegionId = "misiones";

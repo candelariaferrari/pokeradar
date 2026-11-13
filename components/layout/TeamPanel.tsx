@@ -3,6 +3,7 @@ import { MAX_FAVORITES } from "@/lib/pokemon/collection-store";
 import { formatName } from "@/lib/pokemon/utils";
 import { getPokemonEntry } from "@/lib/radar/scan";
 import Tooltip from "@/components/ui/Tooltip";
+import { useHydrated } from "@/lib/hooks/use-hydrated";
 
 interface TeamPanelProps {
   favorites: number[];
@@ -11,7 +12,22 @@ interface TeamPanelProps {
 
 export default function TeamPanel({ favorites, onSelectPokemon }: TeamPanelProps) {
   const slots = Array.from({ length: MAX_FAVORITES }, (_, i) => favorites[i] ?? null);
-
+  const hydrated = useHydrated();
+    if (!hydrated) {
+    return (
+      <section aria-label="Tu equipo" aria-busy="true" className="rounded-lg border border-line bg-elevated/40 p-4">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="text-sm text-ink-muted">Tu equipo</h2>
+          <span className="h-5 w-12 animate-pulse rounded-sm bg-line-strong" />
+        </div>
+        <ul className="grid grid-cols-6 gap-2">
+          {Array.from({ length: MAX_FAVORITES }, (_, i) => (
+            <li key={i} className="aspect-square animate-pulse rounded-full bg-line" />
+          ))}
+        </ul>
+      </section>
+    );
+  }
   return (
     <section aria-label="Tu equipo" className="rounded-lg border border-line bg-elevated/40 p-4">
       <div className="mb-3 flex items-baseline justify-between">

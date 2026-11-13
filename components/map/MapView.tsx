@@ -9,6 +9,7 @@ import type { DetectedPokemon } from "@/lib/radar/scan";
 import RadarMarker from "@/components/map/RadarMarker";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
+import MapLoading from "@/components/map/MapLoading";
 
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
@@ -17,8 +18,8 @@ const MAX_BOUNDS: [[number, number], [number, number]] = [[-82, -58], [-46, -18]
 const ARGENTINA_VIEW: [[number, number], [number, number]] = [[-74, -55.5], [-53, -21.5]];
 
 const COLORS = {
-  land: "#19251E",  // --color-surface
-  water: "#0B120E", // un tono más oscuro que --color-deep
+  land: "#19251E",
+  water: "#0B120E", 
 };
 
 function applyPokeradarColors(map: maplibregl.Map) {
@@ -42,13 +43,10 @@ interface MapViewProps {
   pokemons: DetectedPokemon[];
   selectedPokemonId: number | null;
   focusOffsetX: number;
-  /** Los del escaneo anterior, mientras hacen su animación de salida */
   leavingPokemons: DetectedPokemon[];
-  /** Devuelve true si la ubicación cayó cerca de una región (y la seleccionó) */
   onUserLocated: (point: [number, number]) => boolean;
   onSelectPokemon: (id: number) => void;
   onReady: () => void;
-  /** Clic en una parte vacía del mapa */
   onMapClick: () => void;
 }
 
@@ -67,6 +65,7 @@ export default function MapView({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const [zoom, setZoom] = useState(region.zoom);
+  const [loaded, setLoaded] = useState(false);
   const onMapClickRef = useRef(onMapClick);
 
   useEffect(() => {
@@ -129,9 +128,9 @@ export default function MapView({
           if (status.state === "granted") locateUser();
         })
         .catch(() => { });
+        setLoaded(true);
     });
     map.on("zoomend", () => setZoom(map.getZoom()));
-    // Clic en el mapa (no en un marcador, y sin arrastrar): cerrar la selección
     map.on("click", (e) => {
       const target = e.originalEvent.target as HTMLElement | null;
       if (target?.closest(".maplibregl-marker")) return;
@@ -198,22 +197,22 @@ export default function MapView({
     if (!map || selectedPokemonId === null) return;
 
     const target = pokemons.find((p) => p.id === selectedPokemonId);
-    if (!target) return; // por ejemplo, si se abrió desde "Tu equipo" y no está en el mapa
+    if (!target) return; 
 
     map.flyTo({
       center: target.position,
-      zoom: Math.max(map.getZoom(), region.zoom), // nunca aleja; si venís de otra región, acerca
-      offset: [focusOffsetX, 0], // negativo = el Pokémon queda a la izquierda del centro
+      zoom: Math.max(map.getZoom(), region.zoom), 
+      offset: [focusOffsetX, 0], 
       duration: 800,
     });
   }, [selectedPokemonId, pokemons, region, focusOffsetX]);
   return (
     <>
+      <MapLoading visible={!loaded} />
       <div className="absolute inset-0">
         <div ref={containerRef} className="h-full w-full" />
       </div>
 
-      {/* React dibuja cada marcador DENTRO del elemento que maneja MapLibre */}
       {markerNodes.map(({ pokemon, element }, index) =>
         createPortal(
           <RadarMarker
