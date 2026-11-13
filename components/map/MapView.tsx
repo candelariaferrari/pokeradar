@@ -67,12 +67,21 @@ function applyPokeradarColors(map: maplibregl.Map) {
   }
 }
 
-function addRegionArea(map: maplibregl.Map, regionId: Region["id"]) {
-  map.addSource(AREA_SOURCE, { type: "geojson", data: regionArea(regionId) });
+/** Color del tipo dominante de la región, leído de los tokens de globals.css */
+function regionColor(region: Region) {
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(`--color-type-${region.types[0]}`)
+    .trim();
+  return value || "#A3E635";
+}
+
+function addRegionArea(map: maplibregl.Map, region: Region) {
+  const color = regionColor(region);
+  map.addSource(AREA_SOURCE, { type: "geojson", data: regionArea(region.id) });
   const firstLabelLayer = map.getStyle().layers.find((layer) => layer.type === "symbol")?.id;
 
   map.addLayer(
-    { id: "region-area-fill", type: "fill", source: AREA_SOURCE, paint: { "fill-color": "#A3E635", "fill-opacity": 0.05 } },
+    { id: "region-area-fill", type: "fill", source: AREA_SOURCE, paint: { "fill-color": color, "fill-opacity": 0.06 } },
     firstLabelLayer
   );
   map.addLayer(
@@ -80,7 +89,7 @@ function addRegionArea(map: maplibregl.Map, regionId: Region["id"]) {
       id: "region-area-line",
       type: "line",
       source: AREA_SOURCE,
-      paint: { "line-color": "#A3E635", "line-opacity": 0.55, "line-width": 1.5, "line-dasharray": [2, 3] },
+      paint: { "line-color": color, "line-opacity": 0.7, "line-width": 1.5, "line-dasharray": [2, 3] },
     },
     firstLabelLayer
   );
@@ -187,7 +196,7 @@ export default function MapView({
 
       instance.on("load", () => {
         applyPokeradarColors(instance);
-        addRegionArea(instance, regionRef.current.id);
+        addRegionArea(instance, regionRef.current);
         onReady();
         navigator.permissions
           ?.query({ name: "geolocation" })
@@ -220,6 +229,11 @@ export default function MapView({
     const map = mapRef.current;
     map?.flyTo({ center: region.center, zoom: region.zoom, duration: 1200, essential: true });
     (map?.getSource(AREA_SOURCE) as maplibregl.GeoJSONSource | undefined)?.setData(regionArea(region.id));
+    if (map?.getLayer("region-area-line")) {
+      const color = regionColor(region);
+      map.setPaintProperty("region-area-line", "line-color", color);
+      map.setPaintProperty("region-area-fill", "fill-color", color);
+    }
   }, [region]);
 
   // 3) Un elemento HTML vacío por cada Pokémon detectado
