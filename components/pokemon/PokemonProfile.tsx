@@ -23,7 +23,7 @@ export default function PokemonProfile({ pokemon, regionName, stickyFooter = fal
             {formatDexNumber(pokemon.id)}
           </span>
           <div className="mt-3 flex items-center gap-3">
-            <h2 className="min-w-0 break-words text-[40px] font-bold leading-11 tracking-tight">
+                        <h2 className="min-w-0 wrap-break-word text-[40px] font-bold leading-11 tracking-tight">
               {formatName(pokemon.name)}
             </h2>
             {pokemon.cry && <CryButton src={pokemon.cry} name={formatName(pokemon.name)} />}
