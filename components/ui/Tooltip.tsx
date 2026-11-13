@@ -13,11 +13,7 @@ interface TooltipProps {
   className?: string;
 }
 
-/**
- * Tooltip propio: aparece con el mouse (hover), con el teclado (foco)
- * y con un toque en pantallas táctiles (se ve 1,5 s).
- * Es solo visual: el botón de adentro ya tiene su aria-label.
- */
+/** Tooltip propio */
 export default function Tooltip({ label, children, side = "bottom", className = "" }: TooltipProps) {
   const [open, setOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -33,7 +33,7 @@ const HIDDEN_SOURCE_LAYERS = new Set([
 type MapStyle = ConstructorParameters<typeof maplibregl.Map>[0]["style"];
 let slimStylePromise: Promise<MapStyle> | null = null;
 
-/** Descarga el estilo una sola vez y le saca las capas que no usamos */
+
 function loadSlimStyle(): Promise<MapStyle> {
   slimStylePromise ??= fetch(STYLE_URL)
     .then((res) => {
@@ -67,7 +67,7 @@ function applyPokeradarColors(map: maplibregl.Map) {
   }
 }
 
-/** Color del tipo dominante de la región, leído de los tokens de globals.css */
+
 function regionColor(region: Region) {
   const value = getComputedStyle(document.documentElement)
     .getPropertyValue(`--color-type-${region.types[0]}`)
@@ -116,7 +116,6 @@ function addRegionsOverview(map: maplibregl.Map, activeId: RegionId) {
   map.addSource(OVERVIEW_LABELS, { type: "geojson", data: labels });
 
   const firstLabelLayer = map.getStyle().layers.find((layer) => layer.type === "symbol")?.id;
-  // Misma tipografía que los nombres de ciudades del mapa
   const font = firstLabelLayer ? map.getLayoutProperty(firstLabelLayer, "text-font") : undefined;
 
   map.addLayer(
@@ -254,8 +253,8 @@ export default function MapView({
         maxZoom: 12,
         maxBounds: MAX_BOUNDS,
         attributionControl: { compact: true },
-        fadeDuration: 0, // sin fundido de textos: menos redibujos
-        pixelRatio: Math.min(window.devicePixelRatio, 2), // no dibujar a 3x en celulares
+        fadeDuration: 0, 
+        pixelRatio: Math.min(window.devicePixelRatio, 2), 
       });
       map = instance;
 
@@ -312,7 +311,6 @@ export default function MapView({
       map.setPaintProperty("region-area-line", "line-color", color);
       map.setPaintProperty("region-area-fill", "fill-color", color);
     }
-    // La vista general muestra todas las regiones menos la nueva activa
     OVERVIEW_LAYERS.forEach((id) => {
       if (map?.getLayer(id)) map.setFilter(id, notActive(region.id));
     });

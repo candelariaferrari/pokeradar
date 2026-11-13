@@ -9,7 +9,6 @@ interface MobileRegionsSheetProps extends SidebarContentProps {
 export default function MobileRegionsSheet({ onClose, ...contentProps }: MobileRegionsSheetProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  // Al abrir, el foco va al botón de cerrar; Escape cierra
   useEffect(() => {
     closeRef.current?.focus();
     function onKeyDown(e: KeyboardEvent) {
@@ -21,9 +20,7 @@ export default function MobileRegionsSheet({ onClose, ...contentProps }: MobileR
 
   return (
     <div className="fixed inset-0 z-40 lg:hidden">
-      {/* Fondo oscuro: tocarlo también cierra */}
       <button type="button" aria-label="Cerrar" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-deep/70" />
-
       <div
         role="dialog"
         aria-modal="true"

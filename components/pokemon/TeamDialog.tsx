@@ -30,9 +30,9 @@ export default function TeamDialog({ team, open, onClose, onSelectPokemon }: Tea
     <dialog
       ref={dialogRef}
       aria-labelledby="team-dialog-title"
-      onClose={onClose} // también se dispara con Escape
+      onClose={onClose} 
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose(); // clic en el fondo oscuro
+        if (e.target === e.currentTarget) onClose(); 
       }}
       className="m-auto max-h-[calc(100dvh-2rem)] w-[min(64rem,calc(100%-2rem))] overflow-y-auto rounded-lg border border-line bg-deep text-ink shadow-panel scrollbar-none backdrop:bg-deep/80 backdrop:backdrop-blur-sm"
     >

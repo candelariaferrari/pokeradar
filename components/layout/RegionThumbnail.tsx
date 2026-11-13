@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
 import type { RegionId } from "@/lib/radar/regions";
 
-// Mini-paisajes de 80×52. Cada uno tiene su propia paleta, inspirada en el
-// lugar real, en tonos apagados y terrosos para no competir con los colores
-// de los tipos Pokémon (que son saturados) ni con el lima del radar.
+// Mini-paisajes de 80×52.
 const SCENES: Record<RegionId, ReactNode> = {
   // Selva Misionera: Cataratas, selva y tierra colorada
   misiones: (

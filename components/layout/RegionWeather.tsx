@@ -5,7 +5,7 @@ import type { RegionWeather as Weather, WeatherKind } from "@/lib/radar/weather"
 import type { RegionId } from "@/lib/radar/regions";
 
 const ICONS: Record<WeatherKind, IconName> = {
-  clear: "sun", // de noche se cambia por la luna (abajo)
+  clear: "sun", 
   partly: "cloud",
   cloudy: "cloud",
   fog: "fog",

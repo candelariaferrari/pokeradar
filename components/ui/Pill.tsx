@@ -1,9 +1,9 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
 const VARIANTS = {
-  elevated: "border border-line bg-elevated",               // header
-  floating: "border border-line bg-surface shadow-panel",   // sobre el mapa
-  outline: "border-[1.5px] border-lime",                    // destacado (equipo)
+  elevated: "border border-line bg-elevated",            
+  floating: "border border-line bg-surface shadow-panel",   
+  outline: "border-[1.5px] border-lime",                    
 };
 
 const SIZES = {
@@ -28,7 +28,7 @@ export default function Pill({ children, variant = "elevated", size = "sm", clas
   );
 }
 
-/** El puntito lima "encendido" del radar */
+
 export function RadarDot() {
   return (
     <span aria-hidden="true" className="size-2.5 rounded-full bg-lime shadow-[0_0_0_4px_var(--color-lime-glow)]" />

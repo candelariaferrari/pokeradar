@@ -10,7 +10,6 @@ import CryButton from "@/components/pokemon/CryButton";
 interface PokemonProfileProps {
   pokemon: PokemonDetail;
   regionName: string;
-  /** En el drawer, el botón de favoritos queda fijo abajo */
   stickyFooter?: boolean;
 }
 
@@ -37,7 +36,6 @@ export default function PokemonProfile({ pokemon, regionName, stickyFooter = fal
           </div>
         </div>
         <div className="relative mt-10 size-33">
-          {/* Halo del radar: dos pulsos suaves alrededor del círculo */}
           {["0s", "1.2s"].map((delay) => (
             <span
               key={delay}

@@ -14,7 +14,6 @@ export interface SidebarContentProps {
   onSearchSelect: (id: number) => void;
 }
 
-/** Buscador + regiones + equipo. Lo usan el sidebar (desktop) y la hoja (mobile). */
 export default function SidebarContent({
   selectedRegionId,
   favorites,

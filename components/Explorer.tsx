@@ -56,11 +56,11 @@ export default function Explorer() {
       const id = window.requestIdleCallback(prefetch, { timeout: 3000 });
       return () => window.cancelIdleCallback(id);
     }
-    const id = setTimeout(prefetch, 1500); // Safari viejo no tiene requestIdleCallback
+    const id = setTimeout(prefetch, 1500); 
     return () => clearTimeout(id);
   }, []);
 
-  // Al desmontar, cancelar temporizadores pendientes
+
   useEffect(() => {
     return () => {
       if (leaveTimer.current) clearTimeout(leaveTimer.current);
