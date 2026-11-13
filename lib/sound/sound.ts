@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "pokeradar:sound:v1";
-let enabled = false; // apagado por defecto
+let enabled = false; 
 let loaded = false;
 const listeners = new Set<() => void>();
 
@@ -35,7 +35,7 @@ function subscribe(listener: () => void) {
   };
 }
 
-/** Hook: ¿están activados los sonidos? */
+/** Hook */
 export function useSoundOn(): boolean {
   return useSyncExternalStore(subscribe, isSoundOn, () => false);
 }
@@ -44,11 +44,18 @@ export function useSoundOn(): boolean {
 
 let context: AudioContext | null = null;
 
-function getContext(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  if (!context) context = new AudioContext();
-  if (context.state === "suspended") void context.resume();
-  return context;
+/** Espera a que el audio esté "despierto" antes de programar los tonos */
+function withContext(play: (ac: AudioContext) => void) {
+  if (typeof window === "undefined") return;
+  context ??= new AudioContext();
+  const ac = context;
+  if (ac.state === "running") {
+    play(ac);
+    return;
+  }
+  ac.resume()
+    .then(() => play(ac))
+    .catch(() => {}); // si el navegador no lo permite, silencio sin romper nada
 }
 
 interface ToneOptions {
@@ -57,10 +64,13 @@ interface ToneOptions {
   delay?: number;
 }
 
-function tone(from: number, to: number, duration: number, { type = "sine", volume = 0.07, delay = 0 }: ToneOptions = {}) {
-  const ac = getContext();
-  if (!ac) return;
-
+function tone(
+  ac: AudioContext,
+  from: number,
+  to: number,
+  duration: number,
+  { type = "sine", volume = 0.07, delay = 0 }: ToneOptions = {}
+) {
   const start = ac.currentTime + delay;
   const oscillator = ac.createOscillator();
   const gain = ac.createGain();
@@ -78,39 +88,51 @@ function tone(from: number, to: number, duration: number, { type = "sine", volum
   oscillator.stop(start + duration + 0.05);
 }
 
+type Sound = (ac: AudioContext, count: number) => void;
+
 const SOUNDS = {
-  /** Barrido de radar + dos "pings" */
-  scan() {
-    tone(420, 1200, 0.45, { volume: 0.05 });
-    tone(1200, 1200, 0.1, { delay: 0.5, volume: 0.05 });
-    tone(1200, 1200, 0.1, { delay: 0.72, volume: 0.03 });
+  /** Barrido de radar */
+  scan(ac) {
+    tone(ac, 420, 1200, 0.45, { volume: 0.05 });
+  },
+  /** Un "blip" por Pokémon, al ritmo de la animación de entrada de los marcadores */
+  detect(ac, count) {
+    for (let i = 0; i < count; i++) {
+      tone(ac, 1100 + i * 45, 1100 + i * 45, 0.06, { type: "triangle", volume: 0.025, delay: 0.25 + i * 0.07 });
+    }
+  },
+  /** Viaje a otra región: sube mientras vuela la cámara y "aterriza" con dos notas */
+  travel(ac) {
+    tone(ac, 220, 560, 0.9, { volume: 0.04 });
+    tone(ac, 784, 784, 0.12, { type: "triangle", volume: 0.05, delay: 1.05 });
+    tone(ac, 1175, 1175, 0.22, { type: "triangle", volume: 0.04, delay: 1.17 });
   },
   /** Bip corto al elegir un Pokémon */
-  select() {
-    tone(880, 1320, 0.09, { type: "triangle", volume: 0.06 });
+  select(ac) {
+    tone(ac, 880, 1320, 0.09, { type: "triangle", volume: 0.06 });
   },
   /** Dos notas que suben: se sumó al equipo */
-  favoriteAdd() {
-    tone(660, 660, 0.1, { type: "triangle" });
-    tone(990, 990, 0.18, { type: "triangle", delay: 0.09 });
+  favoriteAdd(ac) {
+    tone(ac, 660, 660, 0.1, { type: "triangle" });
+    tone(ac, 990, 990, 0.18, { type: "triangle", delay: 0.09 });
   },
   /** Una nota que baja: salió del equipo */
-  favoriteRemove() {
-    tone(660, 440, 0.16, { type: "triangle", volume: 0.05 });
+  favoriteRemove(ac) {
+    tone(ac, 660, 440, 0.16, { type: "triangle", volume: 0.05 });
   },
-};
+} satisfies Record<string, Sound>;
 
 export type SoundName = keyof typeof SOUNDS;
 
-/** Reproduce un sonido solo si el usuario los activó */
-export function playSound(name: SoundName) {
+/** Reproduce un sonido solo si el usuario los activó. `count`: cuántos Pokémon aparecen */
+export function playSound(name: SoundName, count = 0) {
   if (!isSoundOn()) return;
-  SOUNDS[name]();
+  withContext((ac) => SOUNDS[name](ac, count));
 }
 
 /** Para el botón del header: activa/desactiva y da una confirmación audible */
 export function toggleSound() {
   const next = !isSoundOn();
   setSoundOn(next);
-  if (next) SOUNDS.select();
+  if (next) withContext((ac) => SOUNDS.select(ac));
 }
