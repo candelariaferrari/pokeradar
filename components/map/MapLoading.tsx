@@ -7,7 +7,7 @@ export default function MapLoading({ visible = true }: MapLoadingProps) {
     <div
       role={visible ? "status" : undefined}
       aria-hidden={!visible}
-      className={`absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-surface transition-opacity duration-500 ${
+      className={`absolute inset-0 z-5 flex flex-col items-center justify-center gap-6 bg-surface transition-opacity duration-500 ${
         visible ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
     >

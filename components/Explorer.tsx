@@ -47,9 +47,17 @@ export default function Explorer() {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    REGIONS.forEach((r) => {
-      fetchRegionWeather(r.id).catch(() => { });
-    });
+    const prefetch = () =>
+      REGIONS.forEach((r) => {
+        fetchRegionWeather(r.id).catch(() => {});
+      });
+
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(prefetch, { timeout: 3000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(prefetch, 1500); // Safari viejo no tiene requestIdleCallback
+    return () => clearTimeout(id);
   }, []);
 
   // Al desmontar, cancelar temporizadores pendientes
