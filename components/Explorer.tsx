@@ -169,6 +169,7 @@ export default function Explorer() {
             onReady={handleScan}
             onUserLocated={handleUserLocated}
             onMapClick={handleMapClick}
+            focusOffsetX={isDesktop ? -250 : 0}
           />
 
           <RadarToolbar

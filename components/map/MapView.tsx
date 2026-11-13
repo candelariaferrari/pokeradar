@@ -41,12 +41,13 @@ interface MapViewProps {
   region: Region;
   pokemons: DetectedPokemon[];
   selectedPokemonId: number | null;
+  focusOffsetX: number;
+  /** Los del escaneo anterior, mientras hacen su animación de salida */
+  leavingPokemons: DetectedPokemon[];
   /** Devuelve true si la ubicación cayó cerca de una región (y la seleccionó) */
   onUserLocated: (point: [number, number]) => boolean;
   onSelectPokemon: (id: number) => void;
   onReady: () => void;
-  /** Los del escaneo anterior, mientras hacen su animación de salida */
-  leavingPokemons: DetectedPokemon[];
   /** Clic en una parte vacía del mapa */
   onMapClick: () => void;
 }
@@ -60,6 +61,7 @@ export default function MapView({
   onReady,
   onUserLocated,
   onMapClick,
+  focusOffsetX
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -180,6 +182,7 @@ export default function MapView({
     [leavingPokemons]
   );
 
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -188,6 +191,22 @@ export default function MapView({
     );
     return () => markers.forEach((marker) => marker.remove());
   }, [leavingNodes]);
+
+  // 7) Al elegir un Pokémon, la cámara vuela hacia él
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || selectedPokemonId === null) return;
+
+    const target = pokemons.find((p) => p.id === selectedPokemonId);
+    if (!target) return; // por ejemplo, si se abrió desde "Tu equipo" y no está en el mapa
+
+    map.flyTo({
+      center: target.position,
+      zoom: Math.max(map.getZoom(), region.zoom), // nunca aleja; si venís de otra región, acerca
+      offset: [focusOffsetX, 0], // negativo = el Pokémon queda a la izquierda del centro
+      duration: 800,
+    });
+  }, [selectedPokemonId, pokemons, region, focusOffsetX]);
   return (
     <>
       <div className="absolute inset-0">
