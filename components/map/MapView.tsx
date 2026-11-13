@@ -305,8 +305,8 @@ export default function MapView({
       )}
 
       {/* Controles */}
-      <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">
-        <div className="flex flex-col rounded-md border border-line bg-surface shadow-panel">
+      <div className="absolute bottom-12 right-3 z-10 flex flex-col gap-2 lg:bottom-auto lg:right-4 lg:top-4">
+        <div className="hidden flex-col rounded-md border border-line bg-surface shadow-panel lg:flex">
           <MapButton label="Acercar" onClick={() => mapRef.current?.zoomIn()} icon="plus" />
           <MapButton label="Alejar" onClick={() => mapRef.current?.zoomOut()} icon="minus" withBorder />
         </div>

@@ -18,7 +18,7 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
   const boostText = boost ? `${boost.reason}: más ${boost.types.map(typeLabel).join(" y ")}` : "";
 
   return (
-    <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-6rem)] flex-col items-start gap-2">
+    <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-2rem)] flex-col items-start gap-2 lg:max-w-[calc(100%-6rem)]">
       <div className="flex flex-wrap items-center gap-2">
         <Pill variant="floating" size="md" role="status">
           <RadarDot />
@@ -84,9 +84,8 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
             type="button"
             onClick={() => onTypeFilter(null)}
             aria-pressed={typeFilter === null}
-            className={`inline-flex h-9 shrink-0 items-center rounded-full border bg-surface px-4 text-sm font-medium shadow-panel transition-colors ${
-              typeFilter === null ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
-            }`}
+            className={`inline-flex h-9 shrink-0 items-center rounded-full border bg-surface px-4 text-sm font-medium shadow-panel transition-colors ${typeFilter === null ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
+              }`}
           >
             Todos
           </button>
