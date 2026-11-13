@@ -186,7 +186,8 @@ export default function Explorer() {
           setTeamOpen((open) => !open);
         }}
       />
-      <main className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 p-3 lg:grid-cols-[340px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-4 lg:p-4">        <Sidebar {...sidebarProps} />
+      <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] gap-3 p-3 lg:grid-cols-[340px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-4 lg:p-4">        
+        <Sidebar {...sidebarProps} />
         {/* Solo mobile: buscador siempre visible */}
         <div className="lg:hidden">
           <PokemonSearch onSelect={handleSearchSelect} />
