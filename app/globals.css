@@ -106,9 +106,14 @@
     outline: 2px solid var(--color-lime);
     outline-offset: 2px;
   }
-    * {
+  * {
     scrollbar-width: thin;
     scrollbar-color: var(--color-line-strong) transparent;
+  }
+  @media (min-width: 1024px) and (max-width: 1535px) {
+    html {
+      font-size: 85%;
+    }
   }
 }
 /* Scroll sin barra visible (se sigue pudiendo desplazar) */
