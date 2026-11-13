@@ -2,16 +2,19 @@ import Icon from "@/components/ui/Icon";
 import Pill, { RadarDot } from "@/components/ui/Pill";
 import TypeChip from "@/components/ui/TypeChip";
 import type { PokemonType } from "@/lib/radar/regions";
+import { typeLabel } from "@/components/ui/TypeChip";
+import type { WeatherBoost } from "@/lib/radar/weather-boost";
 
 interface RadarToolbarProps {
   detectedCount: number;
   onScan: () => void;
   types: PokemonType[];
   typeFilter: PokemonType | null;
+  boost: WeatherBoost | null;
   onTypeFilter: (type: PokemonType | null) => void;
 }
 
-export default function RadarToolbar({ detectedCount, onScan, types, typeFilter, onTypeFilter }: RadarToolbarProps) {
+export default function RadarToolbar({ detectedCount, onScan, types, typeFilter, onTypeFilter, boost }: RadarToolbarProps) {
   return (
     <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-6rem)] flex-col items-start gap-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -34,6 +37,15 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
           <Icon name="radar" strokeWidth={2} />
           Escanear zona
         </button>
+        {boost && (
+          <Pill variant="floating" size="md">
+            <Icon name={boost.icon} className="text-lime" />
+            <span>
+              {boost.reason}
+              <span className="text-ink-muted"> · más {boost.types.map(typeLabel).join(" y ")}</span>
+            </span>
+          </Pill>
+        )}
       </div>
 
       {/* Filtro por tipo: solo si hay más de un tipo para elegir */}
@@ -43,9 +55,8 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
             type="button"
             onClick={() => onTypeFilter(null)}
             aria-pressed={typeFilter === null}
-            className={`inline-flex h-9 items-center rounded-full border bg-surface px-4 text-sm font-medium shadow-panel transition-colors ${
-              typeFilter === null ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
-            }`}
+            className={`inline-flex h-9 items-center rounded-full border bg-surface px-4 text-sm font-medium shadow-panel transition-colors ${typeFilter === null ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
+              }`}
           >
             Todos
           </button>

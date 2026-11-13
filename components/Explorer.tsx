@@ -16,6 +16,9 @@ import { collectionStore, useCollection } from "@/lib/pokemon/collection-store";
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
 import PokemonSearch from "@/components/layout/PokemonSearch";
 import TeamPanel from "@/components/layout/TeamPanel";
+import { useRegionWeather } from "@/lib/hooks/use-region-weather";
+import { fetchRegionWeather, getCachedWeather } from "@/lib/radar/weather-client";
+import { weatherBoost } from "@/lib/radar/weather-boost";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
@@ -34,11 +37,18 @@ export default function Explorer() {
   const [teamOpen, setTeamOpen] = useState(false); // equipo abajo del mapa en mobile
   const { discovered, favorites } = useCollection();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const currentWeather = useRegionWeather(regionId);
   const region = REGIONS.find((r) => r.id === regionId) ?? REGIONS[0];
   const [leaving, setLeaving] = useState<DetectedPokemon[]>([]); // salen con animación
   const [drawerClosing, setDrawerClosing] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    REGIONS.forEach((r) => {
+      fetchRegionWeather(r.id).catch(() => { });
+    });
+  }, []);
 
   // Al desmontar, cancelar temporizadores pendientes
   useEffect(() => {
@@ -49,8 +59,9 @@ export default function Explorer() {
   }, []);
 
   function scan(id: RegionId, options?: Parameters<typeof scanRegion>[1]) {
-    setLeaving(detected); // los que estaban se despiden con animación…
-    setDetected(scanRegion(id, options)); // …y los nuevos aparecen escalonados
+    const boost = weatherBoost(getCachedWeather(id))?.types; // el clima favorece algunos tipos
+    setLeaving(detected);
+    setDetected(scanRegion(id, { ...options, boost }));
     if (leaveTimer.current) clearTimeout(leaveTimer.current);
     leaveTimer.current = setTimeout(() => setLeaving([]), 400);
   }
@@ -178,6 +189,7 @@ export default function Explorer() {
             types={typesAvailableIn(regionId)}
             typeFilter={typeFilter}
             onTypeFilter={handleTypeFilter}
+            boost={weatherBoost(currentWeather)}
           />
 
           {showDrawer && pokemonId !== null && (

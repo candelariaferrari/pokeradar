@@ -62,3 +62,5 @@ export default function TypeChip({ type, solid = false, selected = false, onClic
     </span>
   );
 }
+/** Nombre en español de un tipo ("water" → "Agua") */
+export const typeLabel = (type: PokemonType) => TYPES[type].label;

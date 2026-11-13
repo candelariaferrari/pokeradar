@@ -5,6 +5,7 @@ import { REGIONS } from "./regions";
 import { SPAWN_POINTS } from "./spawn-points";
 
 const ALL_POKEMON = pokemonData as PokemonRegionEntry[];
+const BOOST_WEIGHT = 3; // un Pokémon favorecido tiene 3 veces más chances
 
 export interface DetectedPokemon extends PokemonRegionEntry {
   position: [number, number];
@@ -13,6 +14,8 @@ export interface DetectedPokemon extends PokemonRegionEntry {
 interface ScanOptions {
   type?: PokemonType | null;
   include?: number;
+  /** Tipos favorecidos por el clima: más chances de aparecer */
+  boost?: PokemonType[];
 }
 
 /** Mezcla un array sin modificar el original (Fisher–Yates) */
@@ -24,13 +27,28 @@ function shuffle<T>(items: T[]): T[] {
   }
   return copy;
 }
+/**
+ * Mezcla donde algunos elementos tienen más chances de quedar adelante.
+ * Algoritmo de Efraimidis–Spirakis: clave = random ^ (1 / peso), y se ordena de mayor a menor.
+ */
+function weightedShuffle<T>(items: T[], weightOf: (item: T) => number): T[] {
+  return items
+    .map((item) => ({ item, key: Math.random() ** (1 / weightOf(item)) }))
+    .sort((a, b) => b.key - a.key)
+    .map(({ item }) => item);
+}
 
-/** Elige qué Pokémon "detecta" el radar en una región y dónde aparecen */
-export function scanRegion(regionId: RegionId, { type = null, include }: ScanOptions = {}, count = 8): DetectedPokemon[] {
-  let pool = shuffle(
-    ALL_POKEMON.filter((p) => p.region === regionId && (!type || p.types.includes(type)))
+export function scanRegion(
+  regionId: RegionId,
+  { type = null, include, boost = [] }: ScanOptions = {},
+  count = 8
+): DetectedPokemon[] {
+  const candidates = ALL_POKEMON.filter(
+    (p) => p.region === regionId && (!type || p.types.includes(type))
   );
-
+  let pool = weightedShuffle(candidates, (p) =>
+    boost.some((t) => p.types.includes(t)) ? BOOST_WEIGHT : 1
+  );
   if (include) {
     const target = ALL_POKEMON.find((p) => p.id === include);
     if (target) pool = [target, ...pool.filter((p) => p.id !== include)];
