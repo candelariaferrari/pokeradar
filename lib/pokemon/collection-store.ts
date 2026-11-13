@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
 
-export const MAX_FAVORITES = 6;
+import { TEAM_SIZE } from "./team";
+
+export const MAX_FAVORITES = TEAM_SIZE;
 const STORAGE_KEY = "pokeradar:collection:v1";
 
 export interface Collection {
