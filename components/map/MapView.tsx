@@ -10,6 +10,7 @@ import RadarMarker from "@/components/map/RadarMarker";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import MapLoading from "@/components/map/MapLoading";
+import { regionArea } from "@/lib/radar/geo";
 
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
@@ -21,6 +22,7 @@ const COLORS = {
   land: "#19251E",
   water: "#0B120E", 
 };
+const AREA_SOURCE = "region-area";
 
 function applyPokeradarColors(map: maplibregl.Map) {
   for (const layer of map.getStyle().layers) {
@@ -31,6 +33,25 @@ function applyPokeradarColors(map: maplibregl.Map) {
       map.setPaintProperty(layer.id, "fill-color", COLORS.water);
     }
   }
+}
+
+function addRegionArea(map: maplibregl.Map, regionId: Region["id"]) {
+  map.addSource(AREA_SOURCE, { type: "geojson", data: regionArea(regionId) });
+  const firstLabelLayer = map.getStyle().layers.find((layer) => layer.type === "symbol")?.id;
+
+  map.addLayer(
+    { id: "region-area-fill", type: "fill", source: AREA_SOURCE, paint: { "fill-color": "#A3E635", "fill-opacity": 0.05 } },
+    firstLabelLayer
+  );
+  map.addLayer(
+    {
+      id: "region-area-line",
+      type: "line",
+      source: AREA_SOURCE,
+      paint: { "line-color": "#A3E635", "line-opacity": 0.55, "line-width": 1.5, "line-dasharray": [2, 3] },
+    },
+    firstLabelLayer
+  );
 }
 
 function isInsideArgentina([lng, lat]: [number, number]) {
@@ -48,6 +69,7 @@ interface MapViewProps {
   onSelectPokemon: (id: number) => void;
   onReady: () => void;
   onMapClick: () => void;
+  
 }
 
 export default function MapView({
@@ -71,6 +93,10 @@ export default function MapView({
   useEffect(() => {
     onMapClickRef.current = onMapClick;
   }, [onMapClick]);
+  const regionRef = useRef(region);
+  useEffect(() => {
+    regionRef.current = region;
+  }, [region]);
 
   function flyToUser(position: GeolocationPosition) {
     const map = mapRef.current;
@@ -121,6 +147,7 @@ export default function MapView({
 
     map.on("load", () => {
       applyPokeradarColors(map);
+      addRegionArea(map, regionRef.current.id);
       onReady();
       navigator.permissions
         ?.query({ name: "geolocation" })
@@ -148,7 +175,9 @@ export default function MapView({
 
   // 2) Cada vez que cambia la región, la cámara vuela hacia ella
   useEffect(() => {
-    mapRef.current?.flyTo({ center: region.center, zoom: region.zoom, duration: 1200, essential: true });
+    const map = mapRef.current;
+    map?.flyTo({ center: region.center, zoom: region.zoom, duration: 1200, essential: true });
+    (map?.getSource(AREA_SOURCE) as maplibregl.GeoJSONSource | undefined)?.setData(regionArea(region.id));
   }, [region]);
 
   // 3) Un elemento HTML vacío por cada Pokémon detectado
