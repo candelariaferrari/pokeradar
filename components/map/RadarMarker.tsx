@@ -63,7 +63,7 @@ export default function RadarMarker({ pokemon, selected, onSelect, index, leavin
         className={`relative grid size-full place-items-center overflow-hidden rounded-full border-2 bg-surface transition-transform group-hover:scale-105 ${selected ? "border-lime shadow-glow" : "border-(--type-color)"
           }`}
       >
-        <PokemonSprite id={pokemon.id} className="size-[125%]" />
+        <PokemonSprite id={pokemon.id} animated className="size-[70%]" />
       </span>
     </button>
   );
