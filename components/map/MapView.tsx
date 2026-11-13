@@ -4,13 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Region } from "@/lib/radar/regions";
+import { REGIONS, type Region, type RegionId } from "@/lib/radar/regions";
 import type { DetectedPokemon } from "@/lib/radar/scan";
 import RadarMarker from "@/components/map/RadarMarker";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import MapLoading from "@/components/map/MapLoading";
-import { regionArea } from "@/lib/radar/geo";
+import { regionArea, regionsOverview } from "@/lib/radar/geo";
 
 maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 
@@ -94,6 +94,65 @@ function addRegionArea(map: maplibregl.Map, region: Region) {
     firstLabelLayer
   );
 }
+const OVERVIEW_AREAS = "regions-overview-areas";
+const OVERVIEW_LABELS = "regions-overview-labels";
+/** Por debajo de este zoom se ven todas las regiones */
+const OVERVIEW_MAX_ZOOM = 6.5;
+const OVERVIEW_LAYERS = ["regions-overview-fill", "regions-overview-line", "regions-overview-label"];
+
+/** Opacidad que se desvanece al acercarse: plena en zoom 5, nula en OVERVIEW_MAX_ZOOM */
+function fadeOut(max: number): maplibregl.ExpressionSpecification {
+  return ["interpolate", ["linear"], ["zoom"], 5, max, OVERVIEW_MAX_ZOOM, 0];
+}
+
+/** Todas las regiones menos la activa (esa ya tiene su propio contorno) */
+function notActive(regionId: RegionId): maplibregl.FilterSpecification {
+  return ["!=", ["get", "id"], regionId];
+}
+
+function addRegionsOverview(map: maplibregl.Map, activeId: RegionId) {
+  const { areas, labels } = regionsOverview(regionColor);
+  map.addSource(OVERVIEW_AREAS, { type: "geojson", data: areas });
+  map.addSource(OVERVIEW_LABELS, { type: "geojson", data: labels });
+
+  const firstLabelLayer = map.getStyle().layers.find((layer) => layer.type === "symbol")?.id;
+  // Misma tipografía que los nombres de ciudades del mapa
+  const font = firstLabelLayer ? map.getLayoutProperty(firstLabelLayer, "text-font") : undefined;
+
+  map.addLayer(
+    {
+      id: "regions-overview-fill",
+      type: "fill",
+      source: OVERVIEW_AREAS,
+      filter: notActive(activeId),
+      paint: { "fill-color": ["get", "color"], "fill-opacity": fadeOut(0.14) },
+    },
+    firstLabelLayer
+  );
+  map.addLayer(
+    {
+      id: "regions-overview-line",
+      type: "line",
+      source: OVERVIEW_AREAS,
+      filter: notActive(activeId),
+      paint: { "line-color": ["get", "color"], "line-opacity": fadeOut(0.8), "line-width": 1.5 },
+    },
+    firstLabelLayer
+  );
+  map.addLayer({
+    id: "regions-overview-label",
+    type: "symbol",
+    source: OVERVIEW_LABELS,
+    filter: notActive(activeId),
+    layout: { "text-field": ["get", "name"], "text-font": font ?? ["Noto Sans Regular"], "text-size": 12 },
+    paint: {
+      "text-color": ["get", "color"],
+      "text-opacity": fadeOut(1),
+      "text-halo-color": COLORS.land,
+      "text-halo-width": 1.5,
+    },
+  });
+}
 
 function isInsideArgentina([lng, lat]: [number, number]) {
   const [[west, south], [east, north]] = MAX_BOUNDS;
@@ -110,6 +169,7 @@ interface MapViewProps {
   onSelectPokemon: (id: number) => void;
   onReady: () => void;
   onMapClick: () => void;
+  onSelectRegion: (id: RegionId) => void;
 
 }
 
@@ -122,7 +182,8 @@ export default function MapView({
   onReady,
   onUserLocated,
   onMapClick,
-  focusOffsetX
+  onSelectRegion,
+  focusOffsetX,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -130,6 +191,10 @@ export default function MapView({
   const [zoom, setZoom] = useState(region.zoom);
   const [loaded, setLoaded] = useState(false);
   const onMapClickRef = useRef(onMapClick);
+  const onSelectRegionRef = useRef(onSelectRegion);
+  useEffect(() => {
+    onSelectRegionRef.current = onSelectRegion;
+  }, [onSelectRegion]);
 
   useEffect(() => {
     onMapClickRef.current = onMapClick;
@@ -197,6 +262,7 @@ export default function MapView({
       instance.on("load", () => {
         applyPokeradarColors(instance);
         addRegionArea(instance, regionRef.current);
+        addRegionsOverview(instance, regionRef.current.id);
         onReady();
         navigator.permissions
           ?.query({ name: "geolocation" })
@@ -211,6 +277,18 @@ export default function MapView({
         const target = e.originalEvent.target as HTMLElement | null;
         if (target?.closest(".maplibregl-marker")) return;
         onMapClickRef.current();
+      });
+      // Vista general: tocar una región viaja hacia ella
+      instance.on("click", "regions-overview-fill", (e) => {
+        if (instance.getZoom() >= OVERVIEW_MAX_ZOOM) return; // invisible: no responde
+        const region = REGIONS.find((r) => r.id === e.features?.[0]?.properties?.id);
+        if (region) onSelectRegionRef.current(region.id);
+      });
+      instance.on("mouseenter", "regions-overview-fill", () => {
+        if (instance.getZoom() < OVERVIEW_MAX_ZOOM) instance.getCanvas().style.cursor = "pointer";
+      });
+      instance.on("mouseleave", "regions-overview-fill", () => {
+        instance.getCanvas().style.cursor = "";
       });
       mapRef.current = instance;
     });
@@ -234,6 +312,10 @@ export default function MapView({
       map.setPaintProperty("region-area-line", "line-color", color);
       map.setPaintProperty("region-area-fill", "fill-color", color);
     }
+    // La vista general muestra todas las regiones menos la nueva activa
+    OVERVIEW_LAYERS.forEach((id) => {
+      if (map?.getLayer(id)) map.setFilter(id, notActive(region.id));
+    });
   }, [region]);
 
   // 3) Un elemento HTML vacío por cada Pokémon detectado

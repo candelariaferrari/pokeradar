@@ -204,6 +204,7 @@ export default function Explorer() {
             onReady={handleScan}
             onUserLocated={handleUserLocated}
             onMapClick={handleMapClick}
+            onSelectRegion={handleUserSelectRegion}
             focusOffsetX={isDesktop ? -250 : 0}
           />
 
