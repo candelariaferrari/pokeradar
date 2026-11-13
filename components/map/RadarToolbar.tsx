@@ -1,0 +1,104 @@
+import Icon from "@/components/ui/Icon";
+import Pill, { RadarDot } from "@/components/ui/Pill";
+import Tooltip from "@/components/ui/Tooltip";
+import TypeChip, { typeLabel } from "@/components/ui/TypeChip";
+import type { PokemonType } from "@/lib/radar/regions";
+import type { WeatherBoost } from "@/lib/radar/weather-boost";
+
+interface RadarToolbarProps {
+  detectedCount: number;
+  onScan: () => void;
+  types: PokemonType[];
+  typeFilter: PokemonType | null;
+  onTypeFilter: (type: PokemonType | null) => void;
+  boost: WeatherBoost | null;
+}
+
+export default function RadarToolbar({ detectedCount, onScan, types, typeFilter, onTypeFilter, boost }: RadarToolbarProps) {
+  const boostText = boost ? `${boost.reason}: más ${boost.types.map(typeLabel).join(" y ")}` : "";
+
+  return (
+    <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-2rem)] flex-col items-start gap-2 lg:max-w-[calc(100%-6rem)]">
+      <div className="flex flex-wrap items-center gap-2">
+        <Pill variant="floating" size="md" role="status">
+          <RadarDot />
+          {detectedCount > 0 ? (
+            <>
+              <span className="font-mono">{detectedCount}</span>
+              {/* En mobile solo el número, para que entre todo en una fila */}
+              <span className="hidden sm:inline">detectados</span>
+              <span className="sr-only sm:hidden">Pokémon detectados</span>
+            </>
+          ) : (
+            <>
+              <span aria-hidden="true">…</span>
+              <span className="sr-only">Escaneando</span>
+            </>
+          )}
+        </Pill>
+
+        <button
+          type="button"
+          onClick={onScan}
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold text-on-lime shadow-panel transition-colors hover:bg-lime-soft"
+        >
+          <Icon name="radar" strokeWidth={2} />
+          Escanear zona
+        </button>
+
+        {/* Mobile: solo el ícono del clima; el lugar queda reservado aunque todavía no llegó */}
+        <span className="lg:hidden">
+          {boost ? (
+            <Tooltip label={boostText}>
+              <button
+                type="button"
+                aria-label={boostText}
+                className="grid size-11 place-items-center rounded-full border border-line bg-surface shadow-panel"
+              >
+                <Icon name={boost.icon} className="text-lime" />
+              </button>
+            </Tooltip>
+          ) : (
+            <span aria-hidden="true" className="block size-11 animate-pulse rounded-full border border-line bg-surface" />
+          )}
+        </span>
+
+        {/* Desktop: el aviso completo */}
+        {boost && (
+          <span className="hidden lg:block">
+            <Pill variant="floating" size="md">
+              <Icon name={boost.icon} className="text-lime" />
+              <span>
+                {boost.reason}
+                <span className="text-ink-muted"> · más {boost.types.map(typeLabel).join(" y ")}</span>
+              </span>
+            </Pill>
+          </span>
+        )}
+      </div>
+
+      {/* Filtro por tipo: solo si hay más de un tipo para elegir */}
+      {types.length > 1 && (
+        <div role="group" aria-label="Filtrar por tipo" className="flex max-w-full gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
+          <button
+            type="button"
+            onClick={() => onTypeFilter(null)}
+            aria-pressed={typeFilter === null}
+            className={`inline-flex h-9 shrink-0 items-center rounded-full border bg-surface px-4 text-sm font-medium shadow-panel transition-colors ${typeFilter === null ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
+              }`}
+          >
+            Todos
+          </button>
+          {types.map((type) => (
+            <TypeChip
+              key={type}
+              type={type}
+              selected={typeFilter === type}
+              onClick={() => onTypeFilter(typeFilter === type ? null : type)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

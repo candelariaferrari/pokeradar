@@ -1,11 +1,20 @@
+import Icon from "@/components/ui/Icon";
+import Pill, { RadarDot } from "@/components/ui/Pill";
+import Tooltip from "@/components/ui/Tooltip";
 import { MAX_FAVORITES } from "@/lib/pokemon/collection-store";
+import SoundToggle from "@/components/layout/SoundToggle";
+import { useHydrated } from "@/lib/hooks/use-hydrated";
 
 interface HeaderProps {
   discoveredCount: number;
   favoritesCount: number;
+  teamOpen: boolean;
+  onTeamClick: () => void;
 }
 
-export default function Header({ discoveredCount, favoritesCount }: HeaderProps) {
+export default function Header({ discoveredCount, favoritesCount, teamOpen, onTeamClick }: HeaderProps) {
+  const hydrated = useHydrated();
+  const numberSkeleton = <span aria-hidden="true" className="inline-block h-3.5 w-5 animate-pulse rounded-sm bg-line-strong" />;
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-line px-4 lg:h-20 lg:px-6">
       <div className="flex items-center gap-3">
@@ -24,28 +33,43 @@ export default function Header({ discoveredCount, favoritesCount }: HeaderProps)
       </div>
 
       <div className="flex items-center gap-2 lg:gap-3">
-        <span className="hidden h-9 items-center gap-2 rounded-full border border-line bg-elevated px-4 text-sm font-medium md:inline-flex">
-          <span aria-hidden="true" className="size-2.5 rounded-full bg-lime shadow-[0_0_0_4px_var(--color-lime-glow)]" />
-          Radar activo
+        <SoundToggle />
+        <span className="hidden md:block">
+          <Pill>
+            <RadarDot />
+            Radar activo
+          </Pill>
         </span>
 
-        <span className="inline-flex h-9 items-center gap-2 rounded-full border border-line bg-elevated px-3 text-sm font-medium lg:px-4">
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="fill-type-electric">
-            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" />
-          </svg>
-          <span className="font-mono">{discoveredCount}</span>
-          <span className="hidden sm:inline">descubiertos</span>
-        </span>
+        <Tooltip label="Pokémon descubiertos">
+          <Pill>
+            <Icon name="star" size={16} filled className="text-type-electric" />
+            {hydrated ? <span className="font-mono">{discoveredCount}</span> : numberSkeleton}
+            <span className="hidden sm:inline">descubiertos</span>
+            <span className="sr-only sm:hidden">Pokémon descubiertos</span>
+          </Pill>
+        </Tooltip>
 
-        <span className="inline-flex h-9 items-center gap-2 rounded-full border-[1.5px] border-lime px-3 text-sm font-medium lg:px-4">
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="fill-lime">
-            <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
-          </svg>
-          <span className="hidden sm:inline">Mi equipo</span>
-          <span className="font-mono">
-            {favoritesCount}/{MAX_FAVORITES}
-          </span>
-        </span>
+        <Tooltip label={`Tu equipo: ${favoritesCount} de ${MAX_FAVORITES}`}>
+          <button
+            type="button"
+            onClick={onTeamClick}
+            aria-expanded={teamOpen}
+            aria-label={`Tu equipo: ${favoritesCount} de ${MAX_FAVORITES}`}
+            className={`inline-flex h-9 items-center gap-2 rounded-full border-[1.5px] border-lime px-3 text-sm font-medium transition-colors hover:bg-lime-glow lg:px-4 ${teamOpen ? "bg-lime-glow" : ""
+              }`}
+          >
+            <Icon name="heart" size={16} filled className="text-lime" />
+            <span className="hidden sm:inline">Mi equipo</span>
+            {hydrated ? (
+              <span className="font-mono">
+                {favoritesCount}/{MAX_FAVORITES}
+              </span>
+            ) : (
+              numberSkeleton
+            )}
+          </button>
+        </Tooltip>
       </div>
     </header>
   );

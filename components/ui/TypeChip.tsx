@@ -24,10 +24,28 @@ const TYPES: Record<PokemonType, { label: string; dot: string; solid: string }> 
 interface TypeChipProps {
   type: PokemonType;
   solid?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
 }
 
-export default function TypeChip({ type, solid = false }: TypeChipProps) {
+export default function TypeChip({ type, solid = false, selected = false, onClick }: TypeChipProps) {
   const { label, dot, solid: solidClasses } = TYPES[type];
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={selected}
+        className={`inline-flex h-9 items-center gap-2 rounded-full border bg-surface pl-2 pr-3 text-sm font-medium shadow-panel transition-colors ${
+          selected ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
+        }`}
+      >
+        <span aria-hidden="true" className={`size-4.5 rounded-full ${dot}`} />
+        {label}
+      </button>
+    );
+  }
 
   if (solid) {
     return (
@@ -44,3 +62,5 @@ export default function TypeChip({ type, solid = false }: TypeChipProps) {
     </span>
   );
 }
+/** Nombre en español de un tipo ("water" → "Agua") */
+export const typeLabel = (type: PokemonType) => TYPES[type].label;
