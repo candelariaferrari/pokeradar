@@ -5,7 +5,7 @@ import TypeChip from "@/components/ui/TypeChip";
 import StatBars from "@/components/pokemon/StatBars";
 import FavoriteButton from "@/components/pokemon/FavoriteButton";
 import { formatDexNumber, formatName, type PokemonDetail } from "@/lib/pokemon/utils";
-
+import CryButton from "@/components/pokemon/CryButton";
 
 interface PokemonProfileProps {
   pokemon: PokemonDetail;
@@ -22,7 +22,13 @@ export default function PokemonProfile({ pokemon, regionName, stickyFooter = fal
           <span className="inline-flex h-7 items-center rounded-full bg-elevated px-3 font-mono text-[13px]">
             {formatDexNumber(pokemon.id)}
           </span>
-          <h2 className="mt-3 wrap-break-word text-[40px] font-bold leading-11 tracking-tight">{formatName(pokemon.name)}</h2>
+          <div className="mt-3 flex items-center gap-3">
+            <h2 className="min-w-0 break-words text-[40px] font-bold leading-11 tracking-tight">
+              {formatName(pokemon.name)}
+            </h2>
+            {pokemon.cry && <CryButton src={pokemon.cry} name={formatName(pokemon.name)} />}
+          </div>
+
           {pokemon.genus && <p className="mt-1 text-sm text-ink-muted">{pokemon.genus}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
             {pokemon.types.map((type, i) => (

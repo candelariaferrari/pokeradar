@@ -42,10 +42,11 @@ export interface PokemonDetail {
   id: number;
   name: string;
   types: PokemonType[];
-  genus: string | null;       // "Pokémon Ratón"
+  genus: string | null;    
   description: string | null;
   heightM: number;
   weightKg: number;
   stats: { name: StatName; value: number }[];
   artwork: string;
+  cry: string | null; 
 }

@@ -11,6 +11,7 @@ interface RawPokemon {
   weight: number; // hectogramos
   types: { slot: number; type: { name: string } }[];
   stats: { base_stat: number; stat: { name: string } }[];
+  cries?: { latest: string | null; legacy: string | null };
 }
 
 interface RawSpecies {
@@ -50,5 +51,6 @@ export async function getPokemonDetail(id: number): Promise<PokemonDetail> {
     weightKg: pokemon.weight / 10,
     stats: pokemon.stats.map((s) => ({ name: s.stat.name as StatName, value: s.base_stat })),
     artwork: artworkUrl(pokemon.id),
+    cry: pokemon.cries?.latest ?? pokemon.cries?.legacy ?? null,
   };
 }

@@ -23,6 +23,8 @@ const PATHS = {
   storm: "M7 15h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6 6.5 4.25 4.25 0 0 0 7 15zM13 15l-3 4h3l-2 4",
   fog: "M4 9h16M6 13h12M4 17h16",
   wind: "M3 8h11a3 3 0 1 0-3-3M3 16h15a3 3 0 1 1-3 3M3 12h8",
+  volume: "M11 5L6 9H3v6h3l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13",
+  "volume-off": "M11 5L6 9H3v6h3l5 4V5zM22 9l-6 6M16 9l6 6",
 } as const;
 
 export type IconName = keyof typeof PATHS;
