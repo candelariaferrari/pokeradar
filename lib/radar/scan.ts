@@ -6,6 +6,7 @@ import { SPAWN_POINTS } from "./spawn-points";
 
 const ALL_POKEMON = pokemonData as PokemonRegionEntry[];
 const BOOST_WEIGHT = 3; // un Pokémon favorecido tiene 3 veces más chances
+const MIN_PER_TYPE = 2;
 
 export interface DetectedPokemon extends PokemonRegionEntry {
   position: [number, number];
@@ -14,11 +15,9 @@ export interface DetectedPokemon extends PokemonRegionEntry {
 interface ScanOptions {
   type?: PokemonType | null;
   include?: number;
-  /** Tipos favorecidos por el clima: más chances de aparecer */
   boost?: PokemonType[];
 }
 
-/** Mezcla un array sin modificar el original (Fisher–Yates) */
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -27,10 +26,7 @@ function shuffle<T>(items: T[]): T[] {
   }
   return copy;
 }
-/**
- * Mezcla donde algunos elementos tienen más chances de quedar adelante.
- * Algoritmo de Efraimidis–Spirakis: clave = random ^ (1 / peso), y se ordena de mayor a menor.
- */
+
 function weightedShuffle<T>(items: T[], weightOf: (item: T) => number): T[] {
   return items
     .map((item) => ({ item, key: Math.random() ** (1 / weightOf(item)) }))
@@ -59,13 +55,27 @@ export function scanRegion(
   return pool.slice(0, total).map((pokemon, i) => ({ ...pokemon, position: points[i] }));
 }
 
-/** Tipos de la región que tienen al menos un Pokémon asignado */
 export function typesAvailableIn(regionId: RegionId): PokemonType[] {
   const region = REGIONS.find((r) => r.id === regionId);
   if (!region) return [];
-  return region.types.filter((type) =>
-    ALL_POKEMON.some((p) => p.region === regionId && p.types.includes(type))
-  );
+
+  const counts = new Map<PokemonType, number>();
+  for (const pokemon of ALL_POKEMON) {
+    if (pokemon.region !== regionId) continue;
+    for (const type of pokemon.types) {
+      counts.set(type, (counts.get(type) ?? 0) + 1);
+    }
+  }
+
+  const biomeRank = (type: PokemonType) => {
+    const index = region.types.indexOf(type);
+    return index === -1 ? Infinity : index;
+  };
+
+  return [...counts]
+    .filter(([, count]) => count >= MIN_PER_TYPE)
+    .sort(([typeA, countA], [typeB, countB]) => biomeRank(typeA) - biomeRank(typeB) || countB - countA)
+    .map(([type]) => type);
 }
 
 export function getPokemonEntry(id: number): PokemonRegionEntry | undefined {
