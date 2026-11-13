@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 
-export default function PokemonPageShell({ children }: { children: ReactNode }) {
+export default function PokemonPageShell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-line bg-deep/90 px-4 backdrop-blur">
@@ -14,7 +14,7 @@ export default function PokemonPageShell({ children }: { children: ReactNode }) 
           Pokérad<span className="text-lime">AR</span>
         </span>
       </header>
-      <main className="mx-auto flex max-w-xl flex-col gap-6 p-4 pb-10 sm:p-6">{children}</main>
+      <main className={`mx-auto flex flex-col gap-6 p-4 pb-10 sm:p-6 ${wide ? "max-w-5xl" : "max-w-xl"}`}>{children}</main>
     </div>
   );
 }
