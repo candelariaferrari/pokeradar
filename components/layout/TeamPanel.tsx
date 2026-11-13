@@ -5,6 +5,9 @@ import { getPokemonEntry } from "@/lib/radar/scan";
 import Tooltip from "@/components/ui/Tooltip";
 import { useHydrated } from "@/lib/hooks/use-hydrated";
 import type { CSSProperties } from "react";
+import ShareTeamButton from "@/components/pokemon/ShareTeamButton";
+import { useState } from "react";
+import TeamDialog from "@/components/pokemon/TeamDialog";
 
 interface TeamPanelProps {
   favorites: number[];
@@ -14,6 +17,8 @@ interface TeamPanelProps {
 export default function TeamPanel({ favorites, onSelectPokemon }: TeamPanelProps) {
   const slots = Array.from({ length: MAX_FAVORITES }, (_, i) => favorites[i] ?? null);
   const hydrated = useHydrated();
+  const [viewing, setViewing] = useState(false);
+  const team = favorites.flatMap((id) => getPokemonEntry(id) ?? []);
   if (!hydrated) {
     return (
       <section aria-label="Tu equipo" aria-busy="true" className="rounded-lg border border-line bg-elevated/40 p-4">
@@ -31,11 +36,14 @@ export default function TeamPanel({ favorites, onSelectPokemon }: TeamPanelProps
   }
   return (
     <section aria-label="Tu equipo" className="rounded-lg border border-line bg-elevated/40 p-4">
-      <div className="mb-3 flex items-baseline justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm text-ink-muted">Tu equipo</h2>
-        <span className={`font-mono text-lg font-bold ${favorites.length === MAX_FAVORITES ? "text-lime" : ""}`}>
-          {favorites.length} / {MAX_FAVORITES}
-        </span>
+        <div className="flex items-center gap-1">
+          {favorites.length > 0 && <ShareTeamButton ids={favorites} />}
+          <span className={`font-mono text-lg font-bold ${favorites.length === MAX_FAVORITES ? "text-lime" : ""}`}>
+            {favorites.length} / {MAX_FAVORITES}
+          </span>
+        </div>
       </div>
 
       <ul className="grid grid-cols-6 gap-2">
@@ -59,6 +67,22 @@ export default function TeamPanel({ favorites, onSelectPokemon }: TeamPanelProps
           </li>
         ))}
       </ul>
+            {favorites.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setViewing(true)}
+          className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full border border-line text-sm font-medium text-ink-muted transition-colors hover:border-lime hover:text-ink"
+        >
+          Ver equipo completo
+        </button>
+      )}
+
+      <TeamDialog
+        team={team}
+        open={viewing}
+        onClose={() => setViewing(false)}
+        onSelectPokemon={onSelectPokemon}
+      />
     </section>
   );
 }
