@@ -17,10 +17,42 @@ maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
 const STYLE_URL = "https://tiles.openfreemap.org/styles/dark";
 const MAX_BOUNDS: [[number, number], [number, number]] = [[-82, -58], [-46, -18]];
 const ARGENTINA_VIEW: [[number, number], [number, number]] = [[-74, -55.5], [-53, -21.5]];
+const HIDDEN_SOURCE_LAYERS = new Set([
+  "building",
+  "housenumber",
+  "poi",
+  "aeroway",
+  "aerodrome_label",
+  "mountain_peak",
+  "landuse",
+  "park",
+  "transportation_name",
+  "water_name",
+]);
 
+type MapStyle = ConstructorParameters<typeof maplibregl.Map>[0]["style"];
+let slimStylePromise: Promise<MapStyle> | null = null;
+
+/** Descarga el estilo una sola vez y le saca las capas que no usamos */
+function loadSlimStyle(): Promise<MapStyle> {
+  slimStylePromise ??= fetch(STYLE_URL)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Estilo: ${res.status}`);
+      return res.json();
+    })
+    .then(
+      (style: { layers: { "source-layer"?: string }[] }) =>
+        ({
+          ...style,
+          layers: style.layers.filter((layer) => !HIDDEN_SOURCE_LAYERS.has(layer["source-layer"] ?? "")),
+        }) as MapStyle
+    )
+    .catch(() => STYLE_URL); // si algo falla, usamos el estilo completo
+  return slimStylePromise;
+}
 const COLORS = {
   land: "#19251E",
-  water: "#0B120E", 
+  water: "#0B120E",
 };
 const AREA_SOURCE = "region-area";
 
@@ -69,7 +101,7 @@ interface MapViewProps {
   onSelectPokemon: (id: number) => void;
   onReady: () => void;
   onMapClick: () => void;
-  
+
 }
 
 export default function MapView({
@@ -110,6 +142,7 @@ export default function MapView({
       el.className =
         "size-4 rounded-full border-2 border-deep bg-lime shadow-[0_0_0_6px_var(--color-lime-glow)]";
       el.setAttribute("aria-label", "Tu ubicación");
+      el.setAttribute("role", "img");
       userMarkerRef.current = new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(map);
     } else {
       userMarkerRef.current.setLngLat(lngLat);
@@ -130,43 +163,52 @@ export default function MapView({
     );
   }
 
-  // 1) Crear el mapa una sola vez
+  // 1) Crear el mapa una sola vez, con el estilo aligerado
   useEffect(() => {
-    if (!containerRef.current) return;
+    let cancelled = false;
+    let map: maplibregl.Map | null = null;
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: STYLE_URL,
-      center: region.center,
-      zoom: region.zoom,
-      minZoom: 3.5,
-      maxZoom: 12,
-      maxBounds: MAX_BOUNDS,
-      attributionControl: { compact: true },
-    });
+    loadSlimStyle().then((style) => {
+      if (cancelled || !containerRef.current) return;
 
-    map.on("load", () => {
-      applyPokeradarColors(map);
-      addRegionArea(map, regionRef.current.id);
-      onReady();
-      navigator.permissions
-        ?.query({ name: "geolocation" })
-        .then((status) => {
-          if (status.state === "granted") locateUser();
-        })
-        .catch(() => { });
+      const instance = new maplibregl.Map({
+        container: containerRef.current,
+        style,
+        center: regionRef.current.center,
+        zoom: regionRef.current.zoom,
+        minZoom: 3.5,
+        maxZoom: 12,
+        maxBounds: MAX_BOUNDS,
+        attributionControl: { compact: true },
+        fadeDuration: 0, // sin fundido de textos: menos redibujos
+        pixelRatio: Math.min(window.devicePixelRatio, 2), // no dibujar a 3x en celulares
+      });
+      map = instance;
+
+      instance.on("load", () => {
+        applyPokeradarColors(instance);
+        addRegionArea(instance, regionRef.current.id);
+        onReady();
+        navigator.permissions
+          ?.query({ name: "geolocation" })
+          .then((status) => {
+            if (status.state === "granted") locateUser();
+          })
+          .catch(() => { });
         setLoaded(true);
+      });
+      instance.on("zoomend", () => setZoom(instance.getZoom()));
+      instance.on("click", (e) => {
+        const target = e.originalEvent.target as HTMLElement | null;
+        if (target?.closest(".maplibregl-marker")) return;
+        onMapClickRef.current();
+      });
+      mapRef.current = instance;
     });
-    map.on("zoomend", () => setZoom(map.getZoom()));
-    map.on("click", (e) => {
-      const target = e.originalEvent.target as HTMLElement | null;
-      if (target?.closest(".maplibregl-marker")) return;
-      onMapClickRef.current();
-    });
-    mapRef.current = map;
 
     return () => {
-      map.remove();
+      cancelled = true;
+      map?.remove();
       mapRef.current = null;
       userMarkerRef.current = null;
     };
@@ -226,12 +268,12 @@ export default function MapView({
     if (!map || selectedPokemonId === null) return;
 
     const target = pokemons.find((p) => p.id === selectedPokemonId);
-    if (!target) return; 
+    if (!target) return;
 
     map.flyTo({
       center: target.position,
-      zoom: Math.max(map.getZoom(), region.zoom), 
-      offset: [focusOffsetX, 0], 
+      zoom: Math.max(map.getZoom(), region.zoom),
+      offset: [focusOffsetX, 0],
       duration: 800,
     });
   }, [selectedPokemonId, pokemons, region, focusOffsetX]);

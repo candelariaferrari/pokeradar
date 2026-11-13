@@ -1,8 +1,8 @@
 import Icon from "@/components/ui/Icon";
 import Pill, { RadarDot } from "@/components/ui/Pill";
-import TypeChip from "@/components/ui/TypeChip";
+import Tooltip from "@/components/ui/Tooltip";
+import TypeChip, { typeLabel } from "@/components/ui/TypeChip";
 import type { PokemonType } from "@/lib/radar/regions";
-import { typeLabel } from "@/components/ui/TypeChip";
 import type { WeatherBoost } from "@/lib/radar/weather-boost";
 
 interface RadarToolbarProps {
@@ -10,11 +10,13 @@ interface RadarToolbarProps {
   onScan: () => void;
   types: PokemonType[];
   typeFilter: PokemonType | null;
-  boost: WeatherBoost | null;
   onTypeFilter: (type: PokemonType | null) => void;
+  boost: WeatherBoost | null;
 }
 
 export default function RadarToolbar({ detectedCount, onScan, types, typeFilter, onTypeFilter, boost }: RadarToolbarProps) {
+  const boostText = boost ? `${boost.reason}: más ${boost.types.map(typeLabel).join(" y ")}` : "";
+
   return (
     <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-6rem)] flex-col items-start gap-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -22,10 +24,16 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
           <RadarDot />
           {detectedCount > 0 ? (
             <>
-              <span className="font-mono">{detectedCount}</span> detectados
+              <span className="font-mono">{detectedCount}</span>
+              {/* En mobile solo el número, para que entre todo en una fila */}
+              <span className="hidden sm:inline">detectados</span>
+              <span className="sr-only sm:hidden">Pokémon detectados</span>
             </>
           ) : (
-            "Escaneando…"
+            <>
+              <span aria-hidden="true">…</span>
+              <span className="sr-only">Escaneando</span>
+            </>
           )}
         </Pill>
 
@@ -37,14 +45,35 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
           <Icon name="radar" strokeWidth={2} />
           Escanear zona
         </button>
+
+        {/* Mobile: solo el ícono del clima; el lugar queda reservado aunque todavía no llegó */}
+        <span className="lg:hidden">
+          {boost ? (
+            <Tooltip label={boostText}>
+              <button
+                type="button"
+                aria-label={boostText}
+                className="grid size-11 place-items-center rounded-full border border-line bg-surface shadow-panel"
+              >
+                <Icon name={boost.icon} className="text-lime" />
+              </button>
+            </Tooltip>
+          ) : (
+            <span aria-hidden="true" className="block size-11 animate-pulse rounded-full border border-line bg-surface" />
+          )}
+        </span>
+
+        {/* Desktop: el aviso completo */}
         {boost && (
-          <Pill variant="floating" size="md">
-            <Icon name={boost.icon} className="text-lime" />
-            <span>
-              {boost.reason}
-              <span className="text-ink-muted"> · más {boost.types.map(typeLabel).join(" y ")}</span>
-            </span>
-          </Pill>
+          <span className="hidden lg:block">
+            <Pill variant="floating" size="md">
+              <Icon name={boost.icon} className="text-lime" />
+              <span>
+                {boost.reason}
+                <span className="text-ink-muted"> · más {boost.types.map(typeLabel).join(" y ")}</span>
+              </span>
+            </Pill>
+          </span>
         )}
       </div>
 
@@ -55,8 +84,9 @@ export default function RadarToolbar({ detectedCount, onScan, types, typeFilter,
             type="button"
             onClick={() => onTypeFilter(null)}
             aria-pressed={typeFilter === null}
-            className={`inline-flex h-9 items-center rounded-full border bg-surface px-4 text-sm font-medium shadow-panel transition-colors ${typeFilter === null ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
-              }`}
+            className={`inline-flex h-9 shrink-0 items-center rounded-full border bg-surface px-4 text-sm font-medium shadow-panel transition-colors ${
+              typeFilter === null ? "border-lime bg-elevated" : "border-line hover:border-line-strong"
+            }`}
           >
             Todos
           </button>
